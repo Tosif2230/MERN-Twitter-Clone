@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import TwitterLogo from "./TwitterLogo";
 import { Button } from "./ui/button";
+import AuthModal from "./AuthModal";
 
 function Landing() {
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -34,6 +35,7 @@ function Landing() {
             <Button
               variant="outline"
               className="w-full py-3 rounded-full border-gray-600 bg-black  text-white font-semibold text-base h-12"
+              onClick={() => openAuthModal("signup")}
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path
@@ -59,6 +61,7 @@ function Landing() {
             <Button
               variant="outline"
               className="w-full py-3 rounded-full border-gray-600  bg-black text-white font-semibold text-base h-12"
+              onClick={() => openAuthModal("signup")}
             >
               <svg
                 className="w-5 h-5 mr-2"
@@ -78,19 +81,20 @@ function Landing() {
                 <span className="bg-black px-2 text-gray-400">or</span>
               </div>
             </div>
-            <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-full text-base h-12">
+            <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-full text-base h-12"
+            onClick={() => openAuthModal("login")}>
               Create account
             </Button>
             <p className="text-xs text-gray-400 leading-relaxed">
-              By signing up, you agree to the 
+              By signing up, you agree to the
               <a href="#" className="text-blue-400 hover:underline">
                 Terms of Service
-              </a> 
-              and 
+              </a>
+              and
               <a href="#" className="text-blue-400 hover:underline">
                 Privacy Policy
               </a>
-              , including 
+              , including
               <a href="#" className="text-blue-400 hover:underline">
                 Cookie Use
               </a>
@@ -102,12 +106,18 @@ function Landing() {
             <Button
               variant="outline"
               className="w-full max-w-xs py-3 rounded-full border-gray-600 hover:bg-gray-900 text-blue-400 font-semibold text-base h-12"
+              onClick={() => openAuthModal("login")}
             >
               Log in
             </Button>
           </div>
         </div>
       </div>
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        initialmode={authMode}
+      />
     </div>
   );
 }
