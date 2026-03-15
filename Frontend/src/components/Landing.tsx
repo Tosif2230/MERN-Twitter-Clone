@@ -3,14 +3,19 @@ import React, { useState } from "react";
 import TwitterLogo from "./TwitterLogo";
 import { Button } from "./ui/button";
 import AuthModal from "./AuthModal";
+import { useAuth } from "../context/AuthContext";
 
 function Landing() {
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const { user, logout } = useAuth();
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const openAuthModal = (mode: "login" | "signup") => {
     setAuthMode(mode);
     setShowAuthModal(true);
   };
+  if(user){
+    return <div>Feed Page</div>
+  }
   return (
     <div className="min-h-screen bg-black text-white flex">
       {/* Left side - Logo */}

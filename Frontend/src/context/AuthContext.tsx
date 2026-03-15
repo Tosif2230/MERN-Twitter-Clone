@@ -7,8 +7,11 @@ interface User {
   userName: string;
   displayName: string;
   avatar: string;
-  bio: string;
+  bio?: string;
   joinedDate: string;
+  email: string;
+  website: string;
+  location: string;
 }
 
 interface AuthContextType {
@@ -25,12 +28,14 @@ interface AuthContextType {
     bio: string;
     location: string;
     website: string;
+    avatar: string;
   }) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === null) {
@@ -38,6 +43,7 @@ export const useAuth = () => {
   }
   return context;
 };
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,6 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     setIsLoading(false);
   }, []);
+
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 1000));

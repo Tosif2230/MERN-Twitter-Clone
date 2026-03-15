@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "X Clone - Social Media Platform ",
-  description: "A mordern Twitter clone built with Next.JS",
+  description: "A modern Twitter clone built with Next.JS",
   icons:{
     icon:"/X-Twitter.svg"
   }

@@ -11,9 +11,10 @@ import { Input } from "./ui/input";
 import TwitterLogo from "./TwitterLogo";
 import LoadingSpinner from "./Loading-spinner";
 import { Separator } from "./ui/separator";
+import { useAuth } from "../context/AuthContext";
 
 const AuthModal = ({ isOpen, onClose, initialmode = "login" }: any) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const { login, signup, isLoading } = useAuth();
   const [mode, setMode] = useState<"login" | "signup">(initialmode);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -22,28 +23,70 @@ const AuthModal = ({ isOpen, onClose, initialmode = "login" }: any) => {
     userName: "",
     displayName: "",
   });
-  const [error, setError] = useState({});
+  const [errors, setErrors] = useState({});
   if (!isOpen) return null;
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email";
+    }
+    if (!formData.password.trim()) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "password must be at least 6 characters";
+    }
+    if (mode === "signup")
+      if (!formData.userName.trim()) {
+        newErrors.userName = "Username is required";
+      } else if (formData.userName.length < 3) {
+        newErrors.userName = "Username must be at least 3 characters";
+      } else if (!/^[a-zA-Z0-9_]+$/.test(formData.userName)) {
+        newErrors.userName =
+          "Username can only contain letters, number and underscores";
+      }
+    if (!formData.displayName.trim()) {
+      newErrors.displayName = "Display name is required";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onClose();
-    setError({});
-    setFormData({
-      email: "",
-      password: "",
-      userName: "",
-      displayName: "",
-    });
+    if(!validateForm()||isLoading) return;
+    try {
+      if (mode == "login") {
+        await login(formData.email, formData.password);
+      } else {
+        await signup(
+          formData.userName,
+          formData.displayName,
+          formData.email,
+          formData.password,
+        );
+      }
+      onClose();
+      setErrors({});
+      setFormData({
+        email: "",
+        password: "",
+        userName: "",
+        displayName: "",
+      });
+    } catch (error) {
+      setErrors({ general: "Authentication failed. Please try again." });
+    }
   };
   const handleInputChange = (field: string, value: string) => {
     setFormData((prevData) => ({ ...prevData, [field]: value }));
-    if (error[field]) {
-      setError((prevError: any) => ({ ...prevError, [field]: "" }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
   const switchMode = () => {
     setMode(mode === "login" ? "signup" : "login");
-    setError({});
+    setErrors({});
     setFormData({
       email: "",
       password: "",
@@ -73,9 +116,9 @@ const AuthModal = ({ isOpen, onClose, initialmode = "login" }: any) => {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {error.general && (
+          {errors.general && (
             <div className="bg-red-900/20 border border-red-800 rounded-lg p-3 text-red-400 text-sm">
-              {error.general}
+              {errors.general}
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -98,8 +141,8 @@ const AuthModal = ({ isOpen, onClose, initialmode = "login" }: any) => {
                       className="pl-10 bg-transparent border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
                     />
                   </div>
-                  {error.displayName && (
-                    <p className="text-red-400 text-sm">{error.displayName}</p>
+                  {errors.displayName && (
+                    <p className="text-red-400 text-sm">{errors.displayName}</p>
                   )}
                 </div>
 
@@ -123,8 +166,8 @@ const AuthModal = ({ isOpen, onClose, initialmode = "login" }: any) => {
                       disabled={isLoading}
                     />
                   </div>
-                  {error.userName && (
-                    <p className="text-red-400 text-sm">{error.userName}</p>
+                  {errors.userName && (
+                    <p className="text-red-400 text-sm">{errors.userName}</p>
                   )}
                 </div>
               </>
@@ -145,8 +188,8 @@ const AuthModal = ({ isOpen, onClose, initialmode = "login" }: any) => {
                   disabled={isLoading}
                 />
               </div>
-              {error.email && (
-                <p className="text-red-400 text-sm">{error.email}</p>
+              {errors.email && (
+                <p className="text-red-400 text-sm">{errors.email}</p>
               )}
             </div>
 
@@ -181,8 +224,8 @@ const AuthModal = ({ isOpen, onClose, initialmode = "login" }: any) => {
                   )}
                 </Button>
               </div>
-              {error.password && (
-                <p className="text-red-400 text-sm">{error.password}</p>
+              {errors.password && (
+                <p className="text-red-400 text-sm">{errors.password}</p>
               )}
             </div>
 
