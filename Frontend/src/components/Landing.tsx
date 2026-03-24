@@ -4,6 +4,7 @@ import TwitterLogo from "./TwitterLogo";
 import { Button } from "./ui/button";
 import AuthModal from "./AuthModal";
 import { useAuth } from "../context/AuthContext";
+import Feed from "./Feed";
 
 function Landing() {
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -14,7 +15,7 @@ function Landing() {
     setShowAuthModal(true);
   };
   if(user){
-    return <div>Feed Page</div>
+    return <Feed/>
   }
   return (
     <div className="min-h-screen bg-black text-white flex">
@@ -87,7 +88,7 @@ function Landing() {
               </div>
             </div>
             <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-full text-base h-12"
-            onClick={() => openAuthModal("login")}>
+            onClick={() => openAuthModal("signup")}>
               Create account
             </Button>
             <p className="text-xs text-gray-400 leading-relaxed">
@@ -121,7 +122,7 @@ function Landing() {
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        initialmode={authMode}
+        initialMode={authMode}
       />
     </div>
   );

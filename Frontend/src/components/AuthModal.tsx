@@ -13,9 +13,9 @@ import LoadingSpinner from "./Loading-spinner";
 import { Separator } from "./ui/separator";
 import { useAuth } from "../context/AuthContext";
 
-const AuthModal = ({ isOpen, onClose, initialmode = "login" }: any) => {
+const AuthModal = ({ isOpen, onClose, initialMode = "login" }: any) => {
   const { login, signup, isLoading } = useAuth();
-  const [mode, setMode] = useState<"login" | "signup">(initialmode);
+  const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",

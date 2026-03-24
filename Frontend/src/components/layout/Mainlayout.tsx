@@ -3,13 +3,14 @@ import { useAuth } from "@/src/context/AuthContext";
 import React, { useState } from "react";
 import LoadingSpinner from "../Loading-spinner";
 import Sidebar from "./Sidebar";
+import RightSidebar from "./RightSidebar";
 
 
 
 const Mainlayout = ({ children }: any) => {
   const { user, isLoading } = useAuth();
   const [currentPage, setCurrentPage] = useState("home");
-  if (!isLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">

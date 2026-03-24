@@ -9,9 +9,6 @@ interface User {
   avatar: string;
   bio?: string;
   joinedDate: string;
-  email: string;
-  website: string;
-  location: string;
 }
 
 interface AuthContextType {
