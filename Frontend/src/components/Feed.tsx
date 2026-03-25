@@ -3,6 +3,7 @@ import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import { Card, CardContent } from "./ui/card";
 import LoadingSpinner from "./Loading-spinner";
 import TweetCard from "./TweetCard";
+import TweetComposer from "./TweetComposer";
 
 interface Tweet {
   id: string;
@@ -107,21 +108,20 @@ const Feed = () => {
           </TabsList>
         </Tabs>
       </div>
+      <TweetComposer />
       <div className="divide-y divide-gray-800">
-        {
-          tweets.length === 0 ? (
-            <Card className="bg-black border-none">
-              <CardContent className="py-12 text-center">
-                <div className="text-gray-400 mb-4">
-                <LoadingSpinner size="lg" className="mx-auto mb-4"/>
+        {tweets.length === 0 ? (
+          <Card className="bg-black border-none">
+            <CardContent className="py-12 text-center">
+              <div className="text-gray-400 mb-4">
+                <LoadingSpinner size="lg" className="mx-auto mb-4" />
                 <p>Loading tweets..</p>
-                </div> 
-              </CardContent>
-            </Card>
-          ):(
-            tweets.map((tweet:any)=><TweetCard key={tweet.id} tweet={tweet}/>)
-          )
-        }
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          tweets.map((tweet: any) => <TweetCard key={tweet.id} tweet={tweet} />)
+        )}
       </div>
     </div>
   );

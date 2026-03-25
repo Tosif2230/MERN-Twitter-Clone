@@ -1,4 +1,4 @@
-import { useAuth } from "@/src/context/AuthContext";
+
 import TwitterLogo from "../TwitterLogo";
 import { Button } from "../ui/button";
 import {
@@ -20,6 +20,7 @@ import {
   Settings,
   User,
 } from "lucide-react";
+import { useAuth } from "@/src/context/AuthContext";
 
 const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
   const { user, logout } = useAuth();
