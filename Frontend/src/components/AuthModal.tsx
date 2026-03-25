@@ -60,10 +60,10 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }: any) => {
         await login(formData.email, formData.password);
       } else {
         await signup(
-          formData.userName,
-          formData.displayName,
           formData.email,
           formData.password,
+          formData.userName,
+          formData.displayName,
         );
       }
       onClose();
@@ -147,15 +147,15 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }: any) => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="userName" className="text-white">
-                    Username
+                  <Label htmlFor="username" className="text-white">
+                    User Name
                   </Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                       @
                     </span>
                     <Input
-                      id="userName"
+                      id="username"
                       type="text"
                       placeholder="username"
                       value={formData.userName}
@@ -163,7 +163,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }: any) => {
                         handleInputChange("userName", e.target.value)
                       }
                       className="pl-8 bg-transparent border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
-                      disabled={isLoading}
+                     
                     />
                   </div>
                   {errors.userName && (
@@ -185,7 +185,6 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }: any) => {
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   className="pl-10 bg-transparent border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
-                  disabled={isLoading}
                 />
               </div>
               {errors.email && (

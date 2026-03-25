@@ -33,7 +33,7 @@ const TweetComposer = () => {
                 placeholder="What's happening?"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="bg-transparent border-none text-xl text-white placeholder-gray-500 resize-none min-h-30 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="bg-transparent border-none text-xl text-white placeholder-gray-500 resize-none min-h-[120px] focus-visible:ring-0 focus-visible:ring-offset-0"
               />
               <div className="flex items-center justify-between mt-4">
                 <div className="flex items-center space-x-4 text-blue-400">

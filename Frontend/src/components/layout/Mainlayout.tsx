@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import LoadingSpinner from "../Loading-spinner";
 import Sidebar from "./Sidebar";
 import RightSidebar from "./RightSidebar";
+import ProfilePage from "../ProfilePage";
 
 
 

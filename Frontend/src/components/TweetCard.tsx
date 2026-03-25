@@ -21,7 +21,7 @@ const TweetCard = ({ tweet }: any) => {
     if (num >= 1000) {
       return (num / 1000).toFixed(1) + "K";
     }
-    // return num.toFixed();
+    return num.toString();
   };
   return (
     <Card className="bg-black border-gray-800 border-x-0 border-t-0 rounded-none hover:bg-gray-950/50 transition-colors cursor-pointer">
@@ -95,7 +95,7 @@ const TweetCard = ({ tweet }: any) => {
                 }}
               >
                 <Repeat2 className="h-5 w-5" />
-                <span className="text-sm">{formatNumber(tweet.retweet)}</span>
+                <span className="text-sm">{formatNumber(tweet.retweets)}</span>
               </Button>
               <Button
                 variant="ghost"
