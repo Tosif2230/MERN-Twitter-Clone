@@ -8,14 +8,14 @@ import Feed from "./Feed";
 
 function Landing() {
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, googleSignin } = useAuth();
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const openAuthModal = (mode: "login" | "signup") => {
     setAuthMode(mode);
     setShowAuthModal(true);
   };
-  if(user){
-    return <Feed/>
+  if (user) {
+    return <Feed />;
   }
   return (
     <div className="min-h-screen bg-black text-white flex">
@@ -41,7 +41,7 @@ function Landing() {
             <Button
               variant="outline"
               className="w-full py-3 rounded-full border-gray-600 bg-black  text-white font-semibold text-base h-12"
-              onClick={() => openAuthModal("signup")}
+              onClick={() => googleSignin()}
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path
@@ -87,8 +87,10 @@ function Landing() {
                 <span className="bg-black px-2 text-gray-400">or</span>
               </div>
             </div>
-            <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-full text-base h-12"
-            onClick={() => openAuthModal("signup")}>
+            <Button
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-full text-base h-12"
+              onClick={() => googleSignin()}
+            >
               Create account
             </Button>
             <p className="text-xs text-gray-400 leading-relaxed">
