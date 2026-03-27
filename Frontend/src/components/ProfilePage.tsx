@@ -13,6 +13,7 @@ import {
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import TweetCard from "./TweetCard";
+import Editprofile from "./Editprofile";
 
 interface Tweet {
   id: string;
@@ -118,6 +119,7 @@ const ProfilePage = () => {
         </div>
       </div>
 
+      {/* Cover Photo */}
       <div className="relative">
         <div className="h-48 bg-gradient-to-r from-blue-600 to-purple-600 relative">
           <Button
@@ -144,91 +146,101 @@ const ProfilePage = () => {
             </Button>
           </div>
         </div>
-
-        {/* Profile Info */}
-        <div className="px-4 pb-4 mt-12">
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <h1 className="text-2xl font-bold text-white">
-                {user.displayName}
-              </h1>
-              <p className="text-gray-400">@{user.userName}</p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-2 rounded-full hover:bg-gray-900"
-            >
-              <MoreHorizontal className="h-5 w-5 text-gray-400" />
-            </Button>
+        {/* Edit Profile Button */}
+        <div className="flex justify-end p-4">
+          <Button
+            variant="outline"
+            className="border-gray-600 text-white bg-gray-950 font-semibold rounded-full px-6"
+            onClick={() => setShowEditModal(true)}
+          >
+            Edit profile
+          </Button>
+        </div>
+      </div>
+      {/* Profile Info */}
+      <div className="px-4 pb-4 mt-12">
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <h1 className="text-2xl font-bold text-white">
+              {user.displayName}
+            </h1>
+            <p className="text-gray-400">@{user.userName}</p>
           </div>
-          {user.bio && (
-            <p className="text-white mb-3 leading-relaxed">{user.bio}</p>
-          )}
-          <div className="flex items-center space-x-4 text-gray-400 text-sm mb-3">
-            <div className="flex items-center space-x-1">
-              <MapPin className="h-4 w-4" />
-              <span>Earth</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <LinkIcon className="h-4 w-4" />
-              <span className="text-blue-400">example.com</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Calendar className="h-4 w-4" />
-              <span>Joined</span>
-            </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="p-2 rounded-full hover:bg-gray-900"
+          >
+            <MoreHorizontal className="h-5 w-5 text-gray-400" />
+          </Button>
+        </div>
+        {user.bio && (
+          <p className="text-white mb-3 leading-relaxed">{user.bio}</p>
+        )}
+        <div className="flex items-center space-x-4 text-gray-400 text-sm mb-3">
+          <div className="flex items-center space-x-1">
+            <MapPin className="h-4 w-4" />
+            <span>Earth</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <LinkIcon className="h-4 w-4" />
+            <span className="text-blue-400">example.com</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <Calendar className="h-4 w-4" />
+            <span>Joined</span>
           </div>
         </div>
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-transparent border-b border-gray-800 rounded-none h-auto">
-            <TabsTrigger
-              value="posts"
-              className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
-            >
-              Posts
-            </TabsTrigger>
-            <TabsTrigger
-              value="replies"
-              className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
-            >
-              Replies
-            </TabsTrigger>
-            <TabsTrigger
-              value="highlights"
-              className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
-            >
-              Highlights
-            </TabsTrigger>
-            <TabsTrigger
-              value="articles"
-              className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
-            >
-              Articles
-            </TabsTrigger>
-            <TabsTrigger
-              value="media"
-              className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
-            >
-              Media
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="posts">
-            <div>
-              {userTweets.length === 0 ? (
-                <div className="text-center text-gray-500 py-10">
-                  No posts yet
-                </div>
-              ) : (
-                userTweets.map((tweet) => (
-                  <TweetCard key={tweet.id} tweet={tweet} />
-                ))
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
       </div>
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-5 bg-transparent border-b border-gray-800 rounded-none h-auto">
+          <TabsTrigger
+            value="posts"
+            className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
+          >
+            Posts
+          </TabsTrigger>
+          <TabsTrigger
+            value="replies"
+            className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
+          >
+            Replies
+          </TabsTrigger>
+          <TabsTrigger
+            value="highlights"
+            className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
+          >
+            Highlights
+          </TabsTrigger>
+          <TabsTrigger
+            value="articles"
+            className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
+          >
+            Articles
+          </TabsTrigger>
+          <TabsTrigger
+            value="media"
+            className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
+          >
+            Media
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="posts">
+          <div>
+            {userTweets.length === 0 ? (
+              <div className="text-center text-gray-500 py-10">
+                No posts yet
+              </div>
+            ) : (
+              userTweets.map((tweet) => (
+                <TweetCard key={tweet.id} tweet={tweet} />
+              ))
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+      <Editprofile isOpen={showEditModal} onClose={()=>setShowEditModal}/>
     </div>
   );
 };
