@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 
 dotenv.config();
 const app = express();
-app.use(cors);
+app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -24,5 +24,6 @@ mongoose
     });
   })
   .catch((error) => {
-    console.log("error" , error.message);
+    console.log("error", error.message);
   });
+
