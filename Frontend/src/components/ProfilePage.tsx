@@ -99,7 +99,7 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("posts");
   const [showEditModal, setShowEditModal] = useState(false);
   if (!user) return null;
-  const userTweets = tweets.filter((tweet: any) => tweet.author.id === user.id);
+  const userTweets = tweets.filter((tweet: any) => tweet.author.id === user._id);
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -240,7 +240,7 @@ const ProfilePage = () => {
           </div>
         </TabsContent>
       </Tabs>
-      <Editprofile isOpen={showEditModal} onClose={()=>setShowEditModal}/>
+      <Editprofile isOpen={showEditModal} onClose={()=>setShowEditModal(false)}/>
     </div>
   );
 };

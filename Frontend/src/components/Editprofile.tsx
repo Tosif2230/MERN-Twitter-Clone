@@ -16,10 +16,11 @@ const Editprofile = ({ isOpen, onClose }: any) => {
     bio: user?.bio || "",
     location: "Earth",
     website: "example.com",
+    avatar: user?.avatar || "",
   });
   const [error, setError] = useState<any>({});
 
-  if(!isOpen || !user) return null ;
+  if (!isOpen || !user) return null;
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 

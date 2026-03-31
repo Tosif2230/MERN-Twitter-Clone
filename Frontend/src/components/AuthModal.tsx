@@ -24,20 +24,25 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }: any) => {
     displayName: "",
   });
   const [errors, setErrors] = useState({});
+
   if (!isOpen) return null;
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
+
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Please enter a valid email";
     }
+
     if (!formData.password.trim()) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
       newErrors.password = "password must be at least 6 characters";
     }
-    if (mode === "signup")
+
+    if (mode === "signup") {
       if (!formData.userName.trim()) {
         newErrors.userName = "Username is required";
       } else if (formData.userName.length < 3) {
@@ -46,15 +51,20 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }: any) => {
         newErrors.userName =
           "Username can only contain letters, number and underscores";
       }
-    if (!formData.displayName.trim()) {
-      newErrors.displayName = "Display name is required";
+
+      if (!formData.displayName.trim()) {
+        newErrors.displayName = "Display name is required";
+      }
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if(!validateForm()||isLoading) return;
+    if (!validateForm() || isLoading) return;
+
     try {
       if (mode == "login") {
         await login(formData.email, formData.password);
@@ -67,21 +77,22 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }: any) => {
         );
       }
       onClose();
-      setErrors({});
       setFormData({
         email: "",
         password: "",
         userName: "",
         displayName: "",
       });
+      setErrors({});
     } catch (error) {
       setErrors({ general: "Authentication failed. Please try again." });
     }
   };
+  
   const handleInputChange = (field: string, value: string) => {
     setFormData((prevData) => ({ ...prevData, [field]: value }));
     if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
+      setErrors((prevData) => ({ ...prevData, [field]: "" }));
     }
   };
   const switchMode = () => {
@@ -163,7 +174,6 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }: any) => {
                         handleInputChange("userName", e.target.value)
                       }
                       className="pl-8 bg-transparent border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
-                     
                     />
                   </div>
                   {errors.userName && (
