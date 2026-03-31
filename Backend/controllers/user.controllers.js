@@ -23,7 +23,7 @@ export async function registerUser(req, res) {
 //Login
 export async function loginUser(req, res) {
   try {
-    const { email } = req.body;
+    const { email } = req.query;
     if (!email) {
       return res.status(400).json({ message: "Email Required." });
     }
@@ -38,11 +38,11 @@ export async function loginUser(req, res) {
 }
 
 //Update profile
-export async function userUpdate(req, res) {
+export async function updateUser(req, res) {
   try {
-    const { id } = req.params;
+    const { email } = req.params;
     const updated = await UserModel.findOneAndUpdate(
-      id,
+      { email },
       { $set: req.body },
       { new: true, upsert: false },
     );
@@ -51,3 +51,5 @@ export async function userUpdate(req, res) {
     return res.status(400).send({ error: error.message });
   }
 }
+
+//Delete User
