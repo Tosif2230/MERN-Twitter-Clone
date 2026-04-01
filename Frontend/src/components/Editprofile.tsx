@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import axios from "axios";
+import LoadingSpinner from "./Loading-spinner";
 
 const Editprofile = ({ isOpen, onClose }: any) => {
   const { user, updateProfile } = useAuth();
@@ -68,8 +70,27 @@ const Editprofile = ({ isOpen, onClose }: any) => {
     }
   };
 
-  const handlePhotoUpload = (type: "profile" | "cover") => {
-    console.log(`Upload ${type} photo`);
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    setIsLoading(true);
+
+    const image = e.target.files[0];
+    const formdataImg = new FormData();
+    formdataImg.set("image", image);
+    try {
+      const res = await axios.post(
+        "https://api.imgbb.com/1/upload?key=3df9bb862f57d1690d86189e27aae659",
+        formdataImg,
+      );
+      const url = res.data.data.display_url;
+      if (url) {
+        setFormData((prev) => ({ ...prev, avatar: url }));
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -95,10 +116,18 @@ const Editprofile = ({ isOpen, onClose }: any) => {
               className="bg-white text-black hover:bg-gray-200 font-semibold rounded-full px-6"
               disabled={isLoading}
             >
-              Save
+              {isLoading ? (
+                <div className="flex items-center space-x-2">
+                  <LoadingSpinner size="sm" />
+                  <span>Saving...</span>
+                </div>
+              ) : (
+                "Save"
+              )}
             </Button>
           </div>
         </CardHeader>
+
         <CardContent className="p-0">
           {error.general && (
             <div className="bg-red-900/20 border border-red-800 rounded-lg p-3 text-red-400 text-sm m-4">
@@ -111,8 +140,8 @@ const Editprofile = ({ isOpen, onClose }: any) => {
             <div className="relative">
               <div className="h-48 bg-gradient-to-r from-blue-600 to-purple-600 relative">
                 <Button
-                  variant="ghost"
                   type="button"
+                  variant="ghost"
                   size="sm"
                   className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-3 rounded-full bg-black/70 hover:bg-black/90"
                   disabled={isLoading}
@@ -130,13 +159,23 @@ const Editprofile = ({ isOpen, onClose }: any) => {
                       {user?.displayName?.[0]}
                     </AvatarFallback>
                   </Avatar>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="avatarUpload"
+                    className="hidden"
+                    onChange={handlePhotoUpload}
+                  />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-3 rounded-full bg-black/70 hover:bg-black/90"
                     disabled={isLoading}
-                    onClick={() => handlePhotoUpload("profile")}
+                    onClick={() =>
+                      document.getElementById("avatarUpload")?.click()
+                    }
                   >
                     <Camera className="h-5 w-5 text-white" />
                   </Button>
@@ -187,7 +226,7 @@ const Editprofile = ({ isOpen, onClose }: any) => {
                 />
                 <div className="flex justify-between text-sm">
                   {error.bio && <p className="text-red-400">{error.bio}</p>}
-                  <p className="text-gray-400 ml-auto">{formData.bio.length}</p>
+                  <p className="text-gray-400 ml-auto">{formData.bio.length}/160  </p>
                 </div>
               </div>
               {/* Location */}

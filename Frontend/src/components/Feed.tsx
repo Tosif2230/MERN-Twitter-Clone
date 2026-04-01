@@ -9,7 +9,7 @@ interface Tweet {
   id: string;
   author: {
     id: string;
-    username: string;
+    userName: string;
     displayName: string;
     avatar: string;
     verified?: boolean;
@@ -28,7 +28,7 @@ const tweets: Tweet[] = [
     id: "1",
     author: {
       id: "2",
-      username: "elonmusk",
+      userName: "elonmusk",
       displayName: "Elon Musk",
       avatar:
         "https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=400",
@@ -47,7 +47,7 @@ const tweets: Tweet[] = [
     id: "2",
     author: {
       id: "3",
-      username: "sarahtech",
+      userName: "sarahtech",
       displayName: "Sarah Johnson",
       avatar:
         "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=400",
@@ -66,7 +66,7 @@ const tweets: Tweet[] = [
     id: "3",
     author: {
       id: "4",
-      username: "designguru",
+      userName: "designguru",
       displayName: "Alex Chen",
       avatar:
         "https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=400",

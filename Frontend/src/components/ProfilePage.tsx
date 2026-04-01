@@ -99,7 +99,9 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("posts");
   const [showEditModal, setShowEditModal] = useState(false);
   if (!user) return null;
-  const userTweets = tweets.filter((tweet: any) => tweet.author.id === user._id);
+  const userTweets = tweets.filter(
+    (tweet) => tweet.author.id === user._id,
+  );
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -180,15 +182,24 @@ const ProfilePage = () => {
         <div className="flex items-center space-x-4 text-gray-400 text-sm mb-3">
           <div className="flex items-center space-x-1">
             <MapPin className="h-4 w-4" />
-            <span>Earth</span>
+            <span>{user.location ? user.location : "Earth"}</span>
           </div>
           <div className="flex items-center space-x-1">
             <LinkIcon className="h-4 w-4" />
-            <span className="text-blue-400">example.com</span>
+            <span className="text-blue-400">
+              {user.website ? user.website : "example.com"}
+            </span>
           </div>
           <div className="flex items-center space-x-1">
             <Calendar className="h-4 w-4" />
-            <span>Joined</span>
+            <span>
+              Joined{" "}
+              {user.joinedDate &&
+                new Date(user.joinedDate).toLocaleDateString("en-us", {
+                  month: "long",
+                  year: "numeric",
+                })}
+            </span>
           </div>
         </div>
       </div>
@@ -240,7 +251,10 @@ const ProfilePage = () => {
           </div>
         </TabsContent>
       </Tabs>
-      <Editprofile isOpen={showEditModal} onClose={()=>setShowEditModal(false)}/>
+      <Editprofile
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+      />
     </div>
   );
 };

@@ -10,7 +10,7 @@ import {
 } from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "./FireBase";
-import axiosInstence from "../lib/axiosInstence.js";
+import axiosInstance from "../lib/axiosInstance.js";
 
 interface User {
   _id: string;
@@ -20,6 +20,8 @@ interface User {
   bio?: string;
   joinedDate: string;
   email: string;
+  location: string;
+  website: string;
 }
 
 interface AuthContextType {
@@ -55,23 +57,22 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser?.email) {
         try {
-          const res = await axiosInstence.get("/api/login", {
+          const res = await axiosInstance.get("/api/login", {
             params: { email: firebaseUser.email },
           });
+
           if (res.data) {
             setUser(res.data);
             localStorage.setItem("twitter-user", JSON.stringify(res.data));
           }
-          setIsLoading(false);
         } catch (error) {
-          console.log(error);
-          logout();
+          console.error("Failed to fetch user", error);
         }
       } else {
         setUser(null);
@@ -84,9 +85,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
+
     const usercred = await signInWithEmailAndPassword(auth, email, password);
     const firebaseUser = usercred.user;
-    const res = await axiosInstence.get("/api/login", {
+    const res = await axiosInstance.get("/api/login", {
       params: { email: firebaseUser.email },
     });
     if (res.data) {
@@ -104,6 +106,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // };
     setIsLoading(false);
   };
+
   const signup = async (
     email: string,
     password: string,
@@ -117,13 +120,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       password,
     );
     const user = usercred.user;
-    const newUser: any = {
+
+    const newUser = {
       userName,
       displayName,
       avatar: user.photoURL || "",
       email: user.email,
     };
-    const res = await axiosInstence.post("/api/register", newUser);
+    const res = await axiosInstance.post("/api/register", newUser);
     if (res.data) {
       setUser(res.data);
       localStorage.setItem("twitter-user", JSON.stringify(res.data));
@@ -139,6 +143,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // };
     setIsLoading(false);
   };
+
+
   const logout = async () => {
     setUser(null);
     await signOut(auth);
@@ -153,13 +159,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     avatar: string;
   }) => {
     if (!user) return;
+
     setIsLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    const updatedUser = {
+    const updatedUser: User = {
       ...user,
       ...profileDate,
     };
-    const res = await axiosInstence.patch(
+    const res = await axiosInstance.patch(
       `/api/updateUser/${user.email}`,
       updatedUser,
     );
@@ -170,36 +177,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     setIsLoading(false);
   };
+
   const googleSignin = async () => {
+
     setIsLoading(true);
+
     const googleauthProvider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, googleauthProvider);
     const firebaseUser = result.user;
 
     if (firebaseUser.email) {
-      try {
-        const res = await axiosInstence.get("/api/login", {
-          params: { email: firebaseUser.email },
-        });
+      const res = await axiosInstance.get("/api/login", {
+        params: { email: firebaseUser.email },
+      });
+      if (res.data) {
+        setUser(res.data);
+        localStorage.setItem("twitter-user", JSON.stringify(res.data));
+      } else {
+        const newUser = {
+          userName: firebaseUser.email.split("@")[0],
+          displayName: firebaseUser.displayName || "User",
+          avatar: firebaseUser.photoURL || "",
+          email: firebaseUser.email,
+        };
+        const res = await axiosInstance.post("/api/register", newUser);
         if (res.data) {
           setUser(res.data);
           localStorage.setItem("twitter-user", JSON.stringify(res.data));
-        }
-      } catch (error: any) {
-        if (error.response?.status === 404) {
-          const newUser: any = {
-            userName: firebaseUser.email.split("@")[0],
-            displayName: firebaseUser.displayName || "User",
-            avatar: firebaseUser.photoURL || "",
-            email: firebaseUser.email,
-          };
-          const res = await axiosInstence.post("/api/register", newUser);
-          if (res.data) {
-            setUser(res.data);
-            localStorage.setItem("twitter-user", JSON.stringify(res.data));
-          }
-        } else {
-          console.log(error);
         }
       }
     }
