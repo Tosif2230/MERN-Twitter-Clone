@@ -10,7 +10,6 @@ import {
   Share,
 } from "lucide-react";
 
-
 const TweetCard = ({ tweet }: any) => {
   const liketweet = async (tweetid: any) => {};
   const retweet = async (tweetid: any) => {};
@@ -52,7 +51,13 @@ const TweetCard = ({ tweet }: any) => {
               )}
               <span className="text-gray-500">@{tweet.author.userName}</span>
               <span className="text-gray-500">.</span>
-              <span className="text-gray-500">{tweet.timestamp}</span>
+              <span className="text-gray-500">
+                {tweet.timestamp &&
+                  new Date(tweet.timestamp).toLocaleDateString("en-us", {
+                    month: "long",
+                    year: "numeric",
+                  })}
+              </span>
               <div className="ml-auto">
                 <Button
                   variant="ghost"
@@ -88,25 +93,25 @@ const TweetCard = ({ tweet }: any) => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="flex items-center space-x-2 p-2 rounded-full hover:bg-green-900/20 group"
+                className="flex items-center space-x-2 p-2 rounded-full hover:bg-green-900/20 text-gray-500 hover:text-gray-400 group"
                 onClick={(e) => {
                   e.stopPropagation();
-                  retweet(tweet.id);
+                  retweet(tweet._id);
                 }}
               >
-                <Repeat2 className="h-5 w-5" />
+                <Repeat2 className="h-5 w-5 group-hover:text-gray-400" />
                 <span className="text-sm">{formatNumber(tweet.retweets)}</span>
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                className="flex items-center space-x-2 p-2 rounded-full hover:bg-red-900/20 group"
+                className="flex items-center space-x-2 p-2 rounded-full hover:bg-red-900/20 text-red-500 hover:text-red-400 group"
                 onClick={(e) => {
                   e.stopPropagation();
-                  liketweet(tweet.id);
+                  liketweet(tweet._id);
                 }}
               >
-                <Heart className="h-5 w-5" />
+                <Heart className="h-5 w-5 group-hover:text-red-400" />
                 <span className="text-sm">{formatNumber(tweet.likes)}</span>
               </Button>
               <Button

@@ -7,7 +7,8 @@ const userSchema = mongoose.Schema({
   email: { type: String, required: true, unique: true },
   bio: { type: String, default: "" },
   website: { type: String, default: "" },
-  joinedDate: { type: Date, default: Date.now() },
+  location: { type: String, default: "" },
+  joinedDate: { type: Date, default: Date.now },
 });
 
 const UserModel = mongoose.model("User", userSchema);

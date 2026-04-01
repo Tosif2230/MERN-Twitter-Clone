@@ -1,14 +1,15 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import { Card, CardContent } from "./ui/card";
 import LoadingSpinner from "./Loading-spinner";
 import TweetCard from "./TweetCard";
 import TweetComposer from "./TweetComposer";
+import axiosInstance from "../lib/axiosInstance.js";
 
 interface Tweet {
-  id: string;
+  _id: string;
   author: {
-    id: string;
+    _id: string;
     userName: string;
     displayName: string;
     avatar: string;
@@ -25,9 +26,9 @@ interface Tweet {
 }
 const tweets: Tweet[] = [
   {
-    id: "1",
+    _id: "1",
     author: {
-      id: "2",
+      _id: "2",
       userName: "elonmusk",
       displayName: "Elon Musk",
       avatar:
@@ -44,9 +45,9 @@ const tweets: Tweet[] = [
     retweeted: false,
   },
   {
-    id: "2",
+    _id: "2",
     author: {
-      id: "3",
+      _id: "3",
       userName: "sarahtech",
       displayName: "Sarah Johnson",
       avatar:
@@ -63,9 +64,9 @@ const tweets: Tweet[] = [
     retweeted: false,
   },
   {
-    id: "3",
+    _id: "3",
     author: {
-      id: "4",
+      _id: "4",
       userName: "designguru",
       displayName: "Alex Chen",
       avatar:
@@ -85,6 +86,28 @@ const tweets: Tweet[] = [
   },
 ];
 const Feed = () => {
+  const [tweets, setTweets] = useState<any>([]);
+  const [loading, setLoading] = useState(false);
+  const fetchTweets = async () => {
+    try {
+      setLoading(true);
+      const res = await axiosInstance.get("/api/post");
+      setTweets(res.data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTweets();
+  }, []);
+
+  const handleNewtweet = (newTweet: any) => {
+    setTweets((prev: any) => [newTweet,...prev]);
+  };
+
   return (
     <div className="min-h-screen">
       <div className="sticky top-0 bg-black/90 backdrop-blur-md border-b border-gray-800 z-10">
@@ -108,9 +131,9 @@ const Feed = () => {
           </TabsList>
         </Tabs>
       </div>
-      <TweetComposer />
+      <TweetComposer onTweetposted={handleNewtweet} />
       <div className="divide-y divide-gray-800">
-        {tweets.length === 0 ? (
+        {loading ? (
           <Card className="bg-black border-none">
             <CardContent className="py-12 text-center">
               <div className="text-gray-400 mb-4">
@@ -120,7 +143,7 @@ const Feed = () => {
             </CardContent>
           </Card>
         ) : (
-          tweets.map((tweet: any) => <TweetCard key={tweet.id} tweet={tweet} />)
+          tweets.map((tweet: any) => <TweetCard key={tweet._id} tweet={tweet} />)
         )}
       </div>
     </div>

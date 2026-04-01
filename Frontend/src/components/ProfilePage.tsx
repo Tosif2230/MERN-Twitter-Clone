@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "./ui/button";
 import {
@@ -14,11 +14,12 @@ import { Avatar, AvatarImage } from "./ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import TweetCard from "./TweetCard";
 import Editprofile from "./Editprofile";
+import axiosInstance from "../lib/axiosInstance";
 
 interface Tweet {
-  id: string;
+  _id: string;
   author: {
-    id: string;
+    _id: string;
     userName: string;
     displayName: string;
     avatar: string;
@@ -35,9 +36,9 @@ interface Tweet {
 }
 const tweets: Tweet[] = [
   {
-    id: "1",
+    _id: "1",
     author: {
-      id: "1",
+      _id: "1",
       userName: "elonmusk",
       displayName: "Elon Musk",
       avatar:
@@ -54,9 +55,9 @@ const tweets: Tweet[] = [
     retweeted: false,
   },
   {
-    id: "2",
+    _id: "2",
     author: {
-      id: "1",
+      _id: "1",
       userName: "sarahtech",
       displayName: "Sarah Johnson",
       avatar:
@@ -73,9 +74,9 @@ const tweets: Tweet[] = [
     retweeted: false,
   },
   {
-    id: "3",
+    _id: "3",
     author: {
-      id: "4",
+      _id: "4",
       userName: "designguru",
       displayName: "Alex Chen",
       avatar:
@@ -99,9 +100,25 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("posts");
   const [showEditModal, setShowEditModal] = useState(false);
   if (!user) return null;
-  const userTweets = tweets.filter(
-    (tweet) => tweet.author.id === user._id,
-  );
+  const [tweets, setTweets] = useState<any>([]);
+  const [loading, setLoading] = useState(false);
+  const fetchTweets = async () => {
+    try {
+      setLoading(true);
+      const res = await axiosInstance.get("/api/post");
+      setTweets(res.data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTweets();
+  }, []);
+
+  const userTweets = tweets.filter((tweet) => tweet.author._id === user._id);
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -239,13 +256,13 @@ const ProfilePage = () => {
         </TabsList>
         <TabsContent value="posts">
           <div>
-            {userTweets.length === 0 ? (
+            {loading ? (
               <div className="text-center text-gray-500 py-10">
                 No posts yet
               </div>
             ) : (
-              userTweets.map((tweet) => (
-                <TweetCard key={tweet.id} tweet={tweet} />
+              userTweets.map((tweet : any) => (
+                <TweetCard key={tweet._id} tweet={tweet} />
               ))
             )}
           </div>

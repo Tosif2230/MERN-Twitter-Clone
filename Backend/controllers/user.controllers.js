@@ -3,13 +3,9 @@ import UserModel from "../models/user.model.js";
 //Regester
 export async function registerUser(req, res) {
   try {
-    let { userName, email, password } = req.body;
-
-    const existingUser = await UserModel.findOne({ email });
+    const existingUser = await UserModel.findOne({ email: req.body.email });
     if (existingUser) {
-      return res
-        .status(409)
-        .json({ message: "User already exist with this email." });
+      return res.status(200).send(existingUser);
     }
     const newUser = new UserModel(req.body);
     await newUser.save();
@@ -24,14 +20,12 @@ export async function registerUser(req, res) {
 export async function loginUser(req, res) {
   try {
     const { email } = req.query;
+
     if (!email) {
-      return res.status(400).json({ message: "Email Required." });
+      return res.status(400).send({ error: "Email Required." });
     }
-    const user = await UserModel.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
-    }
-    return res.status(201).send(user);
+    const user = await UserModel.findOne({ email: email });
+    return res.status(200).send(user);
   } catch (error) {
     return res.status(400).send({ error: error.message });
   }
@@ -44,7 +38,7 @@ export async function updateUser(req, res) {
     const updated = await UserModel.findOneAndUpdate(
       { email },
       { $set: req.body },
-      { new: true, upsert: false },
+      { returnDocument: "after", upsert: false },
     );
     return res.status(200).send(updated);
   } catch (error) {

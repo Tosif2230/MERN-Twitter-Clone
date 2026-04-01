@@ -4,27 +4,72 @@ import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
-import { BarChart3, Calendar, Globe, MapPin, Smile } from "lucide-react";
+import { BarChart3, Calendar, Globe, Image, MapPin, Smile } from "lucide-react";
 import { Separator } from "./ui/separator";
+import axios from "axios";
+import { Label } from "./ui/label";
+import axiosInstance from "../lib/axiosInstance";
 
-const TweetComposer = () => {
+const TweetComposer = ({ onTweetposted }: any) => {
   const { user } = useAuth();
   const [content, setContent] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [imageurl, setImageurl] = useState("");
   const maxLength = 200;
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
+    if (!user || !content.trim()) return;
+    setIsLoading(true);
+    try {
+      const tweetData = {
+        author: user?._id,
+        content,
+        image: imageurl,
+      };
+      const res = await axiosInstance.post("/api/post", tweetData);
+      onTweetposted(res.data);
+      setContent("");
+      setImageurl("");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
   const characterCount = content.length;
   const isOverLimit = characterCount > maxLength;
   const isNearLimit = characterCount > maxLength * 0.8;
   if (!user) return null;
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    setIsLoading(true);
+
+    const image = e.target.files[0];
+    const formdataImg = new FormData();
+    formdataImg.set("image", image);
+    try {
+      const res = await axios.post(
+        "https://api.imgbb.com/1/upload?key=3df9bb862f57d1690d86189e27aae659",
+        formdataImg,
+      );
+      const url = res.data.data.display_url;
+      if (url) {
+        setImageurl(url);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <Card className="bg-black border-gray-800 border-x-0 border-t-0 rounded-none">
       <CardContent className="p-4">
         <div className="flex space-x-4">
           <Avatar className="h-12 w-12">
             <AvatarImage src={user.avatar} alt={user.displayName} />
-            <AvatarFallback>{user.displayName[0]}</AvatarFallback>
+            <AvatarFallback>{user.displayName}</AvatarFallback>
           </Avatar>
 
           <div className="flex-1 ">
@@ -37,6 +82,20 @@ const TweetComposer = () => {
               />
               <div className="flex items-center justify-between mt-4">
                 <div className="flex items-center space-x-4 text-blue-400">
+                  <Label
+                    htmlFor="tweetImage"
+                    className="p-2 rounded-full hover:bg-blue-900/20 cursor-pointer"
+                  >
+                    <Image className="h-5 w-5" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="tweetImage"
+                      className="hidden"
+                      onChange={handlePhotoUpload}
+                      disabled={isLoading}
+                    />
+                  </Label>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -129,6 +188,7 @@ const TweetComposer = () => {
                     <Button
                       type="submit"
                       className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-700 disabled:text-gray-500 text-white font-semibold rounded-full px-6"
+                      disabled={!content.trim() || isOverLimit || isLoading}
                     >
                       Post
                     </Button>
