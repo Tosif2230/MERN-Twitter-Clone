@@ -45,17 +45,19 @@ interface AuthContextType {
   isLoading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === null) {
+  if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -72,7 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             localStorage.setItem("twitter-user", JSON.stringify(res.data));
           }
         } catch (error) {
-          console.error("Failed to fetch user", error);
+          console.log("Failed to fetch user", error);
         }
       } else {
         setUser(null);
@@ -121,7 +123,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
     const user = usercred.user;
 
-    const newUser = {
+    const newUser: any = {
       userName,
       displayName,
       avatar: user.photoURL || "",
@@ -144,14 +146,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoading(false);
   };
 
-
   const logout = async () => {
     setUser(null);
     await signOut(auth);
     localStorage.removeItem("twitter-user");
   };
 
-  const updateProfile = async (profileDate: {
+  const updateProfile = async (profileData: {
     displayName: string;
     bio: string;
     location: string;
@@ -161,10 +162,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!user) return;
 
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
+
     const updatedUser: User = {
       ...user,
-      ...profileDate,
+      ...profileData,
     };
     const res = await axiosInstance.patch(
       `/api/updateUser/${user.email}`,
@@ -179,21 +182,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const googleSignin = async () => {
-
     setIsLoading(true);
+    try {
+      const googleauthProvider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, googleauthProvider);
+      const firebaseUser = result.user;
 
-    const googleauthProvider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, googleauthProvider);
-    const firebaseUser = result.user;
+      if (!firebaseUser?.email) {
+        throw new Error("No email found in Google account");
+      }
 
-    if (firebaseUser.email) {
-      const res = await axiosInstance.get("/api/login", {
-        params: { email: firebaseUser.email },
-      });
-      if (res.data) {
-        setUser(res.data);
-        localStorage.setItem("twitter-user", JSON.stringify(res.data));
-      } else {
+      let userData;
+      try {
+        const res = await axiosInstance.get("/api/login", {
+          params: { email: firebaseUser.email },
+        });
+        userData = res.data;
+      } catch {
         const newUser = {
           userName: firebaseUser.email.split("@")[0],
           displayName: firebaseUser.displayName || "User",
@@ -201,13 +206,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           email: firebaseUser.email,
         };
         const res = await axiosInstance.post("/api/register", newUser);
-        if (res.data) {
-          setUser(res.data);
-          localStorage.setItem("twitter-user", JSON.stringify(res.data));
-        }
+        userData = res.data;
       }
+      if (userData) {
+        setUser(userData);
+        localStorage.setItem("twitter-user", JSON.stringify(userData));
+      } else {
+        throw new Error("Login/Register failed: No user data returned");
+      }
+    } catch (error: any) {
+      console.error("Google Sign-In Error:", error);
+      alert(error.response?.data?.message || error.message || "Login failed");
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
   return (
     <AuthContext.Provider
