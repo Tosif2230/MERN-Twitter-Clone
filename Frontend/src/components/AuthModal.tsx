@@ -23,7 +23,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }: any) => {
     userName: "",
     displayName: "",
   });
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   if (!isOpen) return null;
 
