@@ -75,7 +75,7 @@ const TweetCard = ({ tweet }: any) => {
                 </div>
               )}
               <span className="text-gray-500">
-                @{tweetState.author.userName}
+                @{tweetState?.author?.userName}
               </span>
               <span className="text-gray-500">.</span>
               <span className="text-gray-500">

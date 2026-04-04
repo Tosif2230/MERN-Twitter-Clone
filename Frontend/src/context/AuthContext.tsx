@@ -116,11 +116,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     displayName: string,
   ) => {
     setIsLoading(true);
+
+    try {
     const usercred = await createUserWithEmailAndPassword(
       auth,
       email,
       password,
     );
+
     const user = usercred.user;
 
     const newUser: any = {
@@ -130,6 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       email: user.email,
     };
     const res = await axiosInstance.post("/api/register", newUser);
+
     if (res.data) {
       setUser(res.data);
       localStorage.setItem("twitter-user", JSON.stringify(res.data));
@@ -143,8 +147,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     //   bio: "Software developer passionate about building greate products.",
     //   joinedDate: "March 2026",
     // };
+     } catch (error: any) {
+    console.error(error);
+    alert(error.message);
+  } finally {
     setIsLoading(false);
-  };
+  }
+};
 
   const logout = async () => {
     setUser(null);
