@@ -119,7 +119,7 @@ const ProfilePage = () => {
   if (!user) return null;
 
   const userTweets = tweets.filter(
-    (tweet: any) => tweet.author._id === user._id,
+    (tweet: any) => tweet?.author?._id === user._id,
   );
   return (
     <div className="min-h-screen">
