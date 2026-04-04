@@ -66,7 +66,7 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
     },
   ];
   return (
-    <div className="flex flex-col h-screen w-64 border-r border-gray-800 bg-black">
+    <div className="flex flex-col h-screen w-64 border-r border-gray-800 bg-black sticky top-0">
       <div className="p-4">
         <TwitterLogo size="lg" className="text-white" />
       </div>

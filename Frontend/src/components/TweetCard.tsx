@@ -8,9 +8,16 @@ import {
   MoreHorizontal,
   Repeat2,
   Share,
+  Trash2Icon,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import axiosInstance from "../lib/axiosInstance";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 const TweetCard = ({ tweet }: any) => {
   const { user } = useAuth();
@@ -86,13 +93,23 @@ const TweetCard = ({ tweet }: any) => {
                   })}
               </span>
               <div className="ml-auto">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="p-1 rounded-full hover:bg-gray-900"
-                >
-                  <MoreHorizontal className="w-5 h-5 text-gray-500" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="p-1 rounded-full bg-gray-900 "
+                    >
+                      <MoreHorizontal className="w-5 h-5 text-gray-500" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="min-w-max">
+                    <DropdownMenuItem className="text-red-700">
+                      <Trash2Icon className="text-red-700" />
+                      <span className="text-red-700 font-semibold">Delete</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
             <div className="text-white mb-3 leading-relaxed">
@@ -129,7 +146,9 @@ const TweetCard = ({ tweet }: any) => {
                 }}
               >
                 <Repeat2 className="h-5 w-5 group-hover:text-gray-400" />
-                <span className="text-sm">{formatNumber(tweetState.retweets)}</span>
+                <span className="text-sm">
+                  {formatNumber(tweetState.retweets)}
+                </span>
               </Button>
               <Button
                 variant="ghost"
@@ -141,7 +160,9 @@ const TweetCard = ({ tweet }: any) => {
                 }}
               >
                 <Heart className="h-5 w-5 group-hover:text-red-400" />
-                <span className="text-sm">{formatNumber(tweetState.likes)}</span>
+                <span className="text-sm">
+                  {formatNumber(tweetState.likes)}
+                </span>
               </Button>
               <Button
                 variant="ghost"
