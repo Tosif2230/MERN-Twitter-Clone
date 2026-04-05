@@ -98,13 +98,13 @@ const TweetCard = ({ tweet }: any) => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="p-1 rounded-full bg-gray-900 "
+                      className="p-1 rounded-full bg-transparent hover:bg-stone-900"
                     >
-                      <MoreHorizontal className="w-5 h-5 text-gray-500" />
+                      <MoreHorizontal className="w-5 h-5 text-gray-600" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="min-w-max">
-                    <DropdownMenuItem className="text-red-700">
+                  <DropdownMenuContent className="min-w-max bg-transparent">
+                    <DropdownMenuItem className="text-red-700  ">
                       <Trash2Icon className="text-red-700" />
                       <span className="text-red-700 font-semibold">Delete</span>
                     </DropdownMenuItem>

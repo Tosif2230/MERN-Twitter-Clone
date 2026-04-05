@@ -87,15 +87,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
-
-    const usercred = await signInWithEmailAndPassword(auth, email, password);
-    const firebaseUser = usercred.user;
-    const res = await axiosInstance.get("/api/login", {
-      params: { email: firebaseUser.email },
-    });
-    if (res.data) {
-      setUser(res.data);
-      localStorage.setItem("twitter-user", JSON.stringify(res.data));
+    try {
+      const usercred = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUser = usercred.user;
+      const res = await axiosInstance.get("/api/login", {
+        params: { email: firebaseUser.email },
+      });
+      if (res.data) {
+        setUser(res.data);
+        localStorage.setItem("twitter-user", JSON.stringify(res.data));
+      }
+    } catch (error: any) {
+      console.error("Login Error:", error);
+      alert(error.message);
+    } finally {
+      setIsLoading(false);
     }
     // const mockUser: User = {
     //   id: "1",
@@ -106,7 +112,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     //   bio: "Software developer passionate about building greate products.",
     //   joinedDate: "March 2026",
     // };
-    setIsLoading(false);
   };
 
   const signup = async (
@@ -118,42 +123,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
 
     try {
-    const usercred = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password,
-    );
+      const usercred = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
 
-    const user = usercred.user;
+      const user = usercred.user;
 
-    const newUser: any = {
-      userName,
-      displayName,
-      avatar: user.photoURL || "",
-      email: user.email,
-    };
-    const res = await axiosInstance.post("/api/register", newUser);
+      const newUser: any = {
+        userName,
+        displayName,
+        avatar:
+          user.photoURL ||
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgYpOOYgMxD_FO9y7jYv2F_DwMnnVMBj8rWQ&s",
+        email: user.email,
+      };
+      const res = await axiosInstance.post("/api/register", newUser);
 
-    if (res.data) {
-      setUser(res.data);
-      localStorage.setItem("twitter-user", JSON.stringify(res.data));
+      if (res.data) {
+        setUser(res.data);
+        localStorage.setItem("twitter-user", JSON.stringify(res.data));
+      }
+      // const mockUser: User = {
+      //   id: "1",
+      //   userName: userName,
+      //   displayName: displayName,
+      //   avatar:
+      //     "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto-compress&cs-tinysrgb&w-400",
+      //   bio: "Software developer passionate about building greate products.",
+      //   joinedDate: "March 2026",
+      // };
+    } catch (error: any) {
+      console.error(error);
+      alert(error.message);
+    } finally {
+      setIsLoading(false);
     }
-    // const mockUser: User = {
-    //   id: "1",
-    //   userName: userName,
-    //   displayName: displayName,
-    //   avatar:
-    //     "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto-compress&cs-tinysrgb&w-400",
-    //   bio: "Software developer passionate about building greate products.",
-    //   joinedDate: "March 2026",
-    // };
-     } catch (error: any) {
-    console.error(error);
-    alert(error.message);
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const logout = async () => {
     setUser(null);

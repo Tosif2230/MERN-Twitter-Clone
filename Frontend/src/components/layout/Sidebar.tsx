@@ -76,7 +76,7 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
             <li key={item.name}>
               <Button
                 variant="ghost"
-                className={`w-full justify-start text-xl py-6 px-4 rounded-full hover:bg-gray-900 ${
+                className={`w-full justify-start text-xl py-6 px-4 rounded-full hover:bg-stone-900 ${
                   item.current ? "font-bold" : "font-normal"
                 } text-white hover:text-white`}
                 onClick={() => onNavigate(item.page)}
@@ -85,7 +85,7 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
                 {item.name}
                 {item.badge && (
                   <span className="ml-2 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    3
+                    1
                   </span>
                 )}
               </Button>
@@ -104,7 +104,7 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="w-full justify-start p-3 rounded-full hover:bg-gray-900"
+                className="w-full justify-start p-3 h-auto rounded-full hover:bg-stone-900"
               >
                 <Avatar className="h-10 w-10 mr-3">
                   <AvatarImage src={user.avatar} alt={user.displayName} />
