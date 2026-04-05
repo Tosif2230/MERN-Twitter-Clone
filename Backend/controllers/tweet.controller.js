@@ -5,6 +5,7 @@ export async function postTweet(req, res) {
   try {
     const tweet = new TweetModel(req.body);
     await tweet.save();
+    await tweet.populate("author");
     return res.status(201).json(tweet);
   } catch (error) {
     return res.status(400).json({ error: error.message });
@@ -22,17 +23,32 @@ export async function getTweet(req, res) {
     return res.status(400).json({ error: error.message });
   }
 }
-// Liked Tweet
+// Liked Tweet (Toggle mode)
 export async function likedTweet(req, res) {
   try {
     const { userId } = req.body;
-    const tweet = await TweetModel.findById(req.params.tweetId);
-    if (!tweet.likedBy.includes(userId)) {
+    const tweet = await TweetModel.findById(req.params.tweetId).populate(
+      "author",
+    );
+    if (!tweet) {
+      return res.status(404).json({ error: "Tweet not found" });
+    }
+
+    const Liked = tweet.likedBy.includes(userId);
+
+    if (Liked) {
+      // Unlike
+      tweet.likes -= 1;
+      tweet.likedBy = tweet.likedBy.filter((id) => id.toString() !== userId);
+    } else {
+      // Like
       tweet.likes += 1;
       tweet.likedBy.push(userId);
-      await tweet.save();
     }
-    return res.status(200).json(tweet)
+
+    await tweet.save();
+
+    return res.status(200).json(tweet);
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
@@ -42,13 +58,27 @@ export async function likedTweet(req, res) {
 export async function reTweet(req, res) {
   try {
     const { userId } = req.body;
-    const tweet = await TweetModel.findById(req.params.tweetId);
-    if (!tweet.retweetedBy.includes(userId)) {
+    const tweet = await TweetModel.findById(req.params.tweetId).populate(
+      "author",
+    );
+    if (!tweet) {
+      return res.status(404).json({ error: "Tweet not found" });
+    }
+    const ReTweet = tweet.retweetedBy.includes(userId);
+
+    if (ReTweet) {
+      // Unretweet
+      tweet.retweets -= 1;
+      tweet.retweetedBy = tweet.retweetedBy.filter(
+        (id) => id.toString() !== userId,
+      );
+    } else {
+      // Retweet
       tweet.retweets += 1;
       tweet.retweetedBy.push(userId);
-      await tweet.save();
     }
-    return res.status(200).json(tweet)
+    await tweet.save();
+    return res.status(200).json(tweet);
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
