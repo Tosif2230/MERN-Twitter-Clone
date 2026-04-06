@@ -3,10 +3,13 @@ import { useAuth } from "../context/AuthContext";
 import { Button } from "./ui/button";
 import {
   ArrowLeft,
+  Bell,
+  BellOff,
   Calendar,
   Camera,
   LinkIcon,
   MapPin,
+  Settings,
 } from "lucide-react";
 
 import { Avatar, AvatarImage } from "./ui/avatar";
@@ -14,6 +17,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import TweetCard from "./TweetCard";
 import Editprofile from "./Editprofile";
 import axiosInstance from "../lib/axiosInstance";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 interface Tweet {
   _id: string;
@@ -99,6 +108,7 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("posts");
   const [showEditModal, setShowEditModal] = useState(false);
   const [tweets, setTweets] = useState<any>([]);
+  const [notificationEnabled, setNotificationEnabled] = useState(true);
   const [loading, setLoading] = useState(false);
   const fetchTweets = async () => {
     try {
@@ -124,7 +134,7 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="sticky top-0 bg-black/90 backdrop-blur-md border-b border-gray-800 z-10">
+      <div className="flex items-center justify-between sticky top-0 bg-black/90 backdrop-blur-md border-b border-gray-800 z-10">
         <div className="flex items-center px-4 py-2 space-x-6">
           <Button
             variant="ghost"
@@ -139,6 +149,26 @@ const ProfilePage = () => {
             </h1>
             <p className="text-sm text-gray-400">{userTweets.length} posts</p>
           </div>
+        </div>
+        <div className="ml-auto">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="m-4 p-2 rounded-full hover:bg-gray-900"
+              >
+                <Settings className="text-white h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent
+              align="end"
+              className="w-56 bg-black border border-gray-800 rounded-xl shadow-lg p-2"
+            >
+              <DropdownMenuItem className="text-white hover:bg-gray-900 rounded-md cursor-pointer"></DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -217,8 +247,24 @@ const ProfilePage = () => {
           </div>
         </div>
         <div className="flex gap-3">
-          <span className="text-sm text-gray-400 cursor-pointer hover:border-b hover:border-white  ">0 Following</span>
-          <span className="text-sm text-gray-400 cursor-pointer hover:border-b hover:border-white  ">0 Followers</span>
+          <span className="text-sm text-gray-400 cursor-pointer hover:border-b hover:border-white  ">
+            0 Following
+          </span>
+          <span className="text-sm text-gray-400 cursor-pointer hover:border-b hover:border-white  ">
+            0 Followers
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="p-2 items-center rounded-full bg-transparent hover:bg-transparent"
+            onClick={() => setNotificationEnabled((prev: any) => !prev)}
+          >
+            {notificationEnabled ? (
+              <Bell className="text-white" />
+            ) : (
+              <BellOff className="text-red-500" />
+            )}
+          </Button>
         </div>
       </div>
       {/* Tabs */}
