@@ -3,9 +3,11 @@ import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import {
+  ChartBar,
   Heart,
   MessageCircle,
   MoreHorizontal,
+  Pin,
   Repeat2,
   Share,
   Trash2Icon,
@@ -103,10 +105,21 @@ const TweetCard = ({ tweet }: any) => {
                       <MoreHorizontal className="w-5 h-5 text-gray-600" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="min-w-max bg-transparent">
-                    <DropdownMenuItem className="text-red-700  ">
-                      <Trash2Icon className="text-red-700" />
-                      <span className="text-red-700 font-semibold">Delete</span>
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-56 bg-black border border-gray-800 rounded-xl shadow-lg "
+                  >
+                    <DropdownMenuItem className="text-white hover:bg-gray-900 rounded-md cursor-pointer">
+                      <Trash2Icon className="text-red-500" />
+                      Delete
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-white hover:bg-gray-900 rounded-md cursor-pointer">
+                      <Pin className="text-white" />
+                      Pin to your profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-white hover:bg-gray-900 rounded-md cursor-pointer">
+                      <ChartBar className="hover:text-black" />
+                      View post activity
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

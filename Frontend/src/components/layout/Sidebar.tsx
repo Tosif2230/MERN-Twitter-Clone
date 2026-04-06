@@ -92,14 +92,14 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
             </li>
           ))}
         </ul>
-        <div className="mt-8 px-2">
+        <div className="mt-4 px-2 py-2">
           <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-full text-lg">
             Post
           </Button>
         </div>
       </nav>
       {user && (
-        <div className="p-4 border-t border-gray-800">
+        <div className="p-2 border-t border-gray-800">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

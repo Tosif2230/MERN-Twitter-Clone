@@ -5,8 +5,9 @@ import LoadingSpinner from "../Loading-spinner";
 import Sidebar from "./Sidebar";
 import RightSidebar from "./RightSidebar";
 import ProfilePage from "../ProfilePage";
-
-
+import Notifications from "../Pages/Notifications";
+import Messages from "../Pages/Messages";
+import Bookmarks from "../Pages/Bookmarks";
 
 const Mainlayout = ({ children }: any) => {
   const { user, isLoading } = useAuth();
@@ -30,7 +31,11 @@ const Mainlayout = ({ children }: any) => {
         <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
       </div>
       <main className="flex-1 max-w-2xl border-x border-gray-800">
-        {currentPage === "profile" ? <ProfilePage /> : children}
+        {currentPage === "home" && children}
+        {currentPage === "profile" && <ProfilePage />}
+        {currentPage === "notifications" && <Notifications />}
+        {currentPage === "messages" && <Messages />}
+        {currentPage === "bookmarks" && <Bookmarks />}
       </main>
       <div className="hidden lg:block w-80 p-4">
         <RightSidebar />
