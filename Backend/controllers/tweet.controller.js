@@ -12,6 +12,30 @@ export async function postTweet(req, res) {
   }
 }
 
+//Delete tweet
+export async function deleteTweet(req, res) {
+  try {
+    const { tweetId } = req.params;
+    const { userId } = req.body;
+
+    const tweet = await TweetModel.findById(tweetId);
+
+    if (!tweet) {
+      return res.status(404).json({ error: "Tweet not found" });
+    }
+
+    if (tweet.author.toString() !== userId) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    await tweet.deleteOne();
+
+    return res.status(200).json({ message: "Tweet deleted successfully" });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+}
+
 //get all tweet
 export async function getTweet(req, res) {
   try {

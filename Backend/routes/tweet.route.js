@@ -3,6 +3,7 @@ import {
   postTweet,
   likedTweet,
   reTweet,
+  deleteTweet,
 } from "../controllers/tweet.controller.js";
 
 // Tweet API Routes
@@ -18,4 +19,7 @@ export default function tweetRoute(app) {
   
   //Re Tweet
   app.post("/api/retweet/:tweetId", reTweet);
+
+  //Delete Tweet for user
+  app.delete("/api/delete/:tweetId", deleteTweet);
 }
