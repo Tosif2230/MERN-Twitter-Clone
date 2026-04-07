@@ -24,6 +24,7 @@ import {
 const TweetCard = ({ tweet }: any) => {
   const { user } = useAuth();
   const [tweetState, settweetState] = useState(tweet);
+  const [deleted, setDeleted] = useState(false);
   const liketweet = async (tweetid: string) => {
     try {
       const res = await axiosInstance.post(`/api/like/${tweetid}`, {
@@ -34,6 +35,18 @@ const TweetCard = ({ tweet }: any) => {
       console.log(error);
     }
   };
+  if (deleted) return null;
+  const deleteTweet = async (tweetid: string) => {
+    try {
+       await axiosInstance.delete(`/api/delete/${tweetid}`, {
+        data: { userId: user?._id },
+      });
+      setDeleted(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const retweet = async (tweetid: string) => {
     try {
       const res = await axiosInstance.post(`/api/retweet/${tweetid}`, {
@@ -65,7 +78,9 @@ const TweetCard = ({ tweet }: any) => {
               src={tweetState?.author?.avatar}
               alt={tweetState?.author?.displayName}
             />
-            <AvatarFallback>{tweetState?.author?.displayName}</AvatarFallback>
+            <AvatarFallback>
+              {tweetState?.author?.displayName?.charAt(0)}
+            </AvatarFallback>
           </Avatar>
 
           <div className="flex-1 min-w-0">
@@ -101,6 +116,7 @@ const TweetCard = ({ tweet }: any) => {
                       variant="ghost"
                       size="sm"
                       className="p-1 rounded-full bg-transparent hover:bg-stone-900"
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <MoreHorizontal className="w-5 h-5 text-gray-600" />
                     </Button>
@@ -109,7 +125,13 @@ const TweetCard = ({ tweet }: any) => {
                     align="end"
                     className="w-56 bg-black border border-gray-800 rounded-xl shadow-lg "
                   >
-                    <DropdownMenuItem className="text-white hover:bg-gray-900 rounded-md cursor-pointer">
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteTweet(tweetState._id);
+                      }}
+                      className="text-white hover:bg-gray-900 rounded-md cursor-pointer"
+                    >
                       <Trash2Icon className="text-red-500" />
                       Delete
                     </DropdownMenuItem>
