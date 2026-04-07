@@ -15,7 +15,7 @@ const Notifications = () => {
             size="sm"
             className="p-2 text-white items-center rounded-full bg-transparent hover:bg-transparent"
             onClick={() => setNotificationEnabled((prev: any) => !prev)}
-          ><span>Notifications</span>
+          >
             {notificationEnabled ? (
               <Bell className="text-white" />
             ) : (
