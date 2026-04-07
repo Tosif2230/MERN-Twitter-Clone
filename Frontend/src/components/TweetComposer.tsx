@@ -72,15 +72,15 @@ const TweetComposer = ({ onTweetposted }: any) => {
             <AvatarFallback>{user.displayName}</AvatarFallback>
           </Avatar>
 
-          <div className="flex-1 ">
+          <div className="flex-1 min-w-0">
             <form onSubmit={handleSubmit}>
               <Textarea
                 placeholder="What's happening?"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="bg-transparent border-none text-xl text-white placeholder-gray-500 resize-none min-h-10 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="w-full max-w-full wrap-break-word whitespace-pre-wrap overflow-hidden bg-transparent border-none text-xl text-white placeholder-gray-500 resize-none min-h-10 focus-visible:ring-0 focus-visible:ring-offset-0"
               />
-              <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center justify-between mt-4 flex-wrap gap-2">
                 <div className="flex items-center space-x-4 text-blue-400">
                   <Label
                     htmlFor="tweetImage"

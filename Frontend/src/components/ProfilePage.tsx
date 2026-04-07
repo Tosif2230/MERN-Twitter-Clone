@@ -246,13 +246,15 @@ const ProfilePage = () => {
             </span>
           </div>
         </div>
-        <div className="flex gap-3">
-          <span className="text-sm text-gray-400 cursor-pointer hover:border-b hover:border-white  ">
-            0 Following
-          </span>
-          <span className="text-sm text-gray-400 cursor-pointer hover:border-b hover:border-white  ">
-            0 Followers
-          </span>
+        <div className="flex justify-between items-center">
+          <div className="flex gap-3">
+            <span className="text-sm text-gray-400 cursor-pointer hover:border-b hover:border-white  ">
+              0 Following
+            </span>
+            <span className="text-sm text-gray-400 cursor-pointer hover:border-b hover:border-white  ">
+              0 Followers
+            </span>
+          </div>
           <Button
             variant="ghost"
             size="sm"
