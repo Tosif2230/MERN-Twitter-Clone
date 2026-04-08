@@ -1,9 +1,22 @@
 import TweetModel from "../models/tweet.model.js";
 
 //Post Tweet
+const KEYWORDS = ["cricket", "science"];
+
 export async function postTweet(req, res) {
   try {
-    const tweet = new TweetModel(req.body);
+    const { content, author } = req.body;
+    if (!content) {
+      return res.status(400).json({ error: "Content Required" });
+    }
+    const hasKeyword = KEYWORDS.some((k) => content.toLowerCase().includes(k));
+
+    const tweet = new TweetModel({
+      content,
+      author,
+      hasKeyword,
+      timestamp: new Date(),
+    });
     await tweet.save();
     await tweet.populate("author");
     return res.status(201).json(tweet);

@@ -108,7 +108,7 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("posts");
   const [showEditModal, setShowEditModal] = useState(false);
   const [tweets, setTweets] = useState<any>([]);
-  const [notificationEnabled, setNotificationEnabled] = useState(true);
+  const { notificationsEnabled, setNotificationsEnabled } = useAuth();
   const [loading, setLoading] = useState(false);
   const fetchTweets = async () => {
     try {
@@ -259,9 +259,9 @@ const ProfilePage = () => {
             variant="ghost"
             size="sm"
             className="p-2 items-center rounded-full bg-transparent hover:bg-transparent"
-            onClick={() => setNotificationEnabled((prev: any) => !prev)}
+           onClick={() => setNotificationsEnabled((prev:any) => !prev)}
           >
-            {notificationEnabled ? (
+            {notificationsEnabled ? (
               <Bell className="text-white" />
             ) : (
               <BellOff className="text-red-500" />

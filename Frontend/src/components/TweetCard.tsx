@@ -38,7 +38,7 @@ const TweetCard = ({ tweet }: any) => {
   if (deleted) return null;
   const deleteTweet = async (tweetid: string) => {
     try {
-       await axiosInstance.delete(`/api/delete/${tweetid}`, {
+      await axiosInstance.delete(`/api/delete/${tweetid}`, {
         data: { userId: user?._id },
       });
       setDeleted(true);
@@ -125,20 +125,24 @@ const TweetCard = ({ tweet }: any) => {
                     align="end"
                     className="w-56 bg-black border border-gray-800 rounded-xl shadow-lg "
                   >
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteTweet(tweetState._id);
-                      }}
-                      className="text-white hover:bg-gray-900 rounded-md cursor-pointer"
-                    >
-                      <Trash2Icon className="text-red-500" />
-                      Delete
-                    </DropdownMenuItem>
+                    {user?._id === tweetState.author?._id && (
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteTweet(tweetState._id);
+                        }}
+                        className="text-white hover:bg-gray-900 rounded-md cursor-pointer"
+                      >
+                        <Trash2Icon className="text-red-500" />
+                        Delete
+                      </DropdownMenuItem>
+                    )}
+
                     <DropdownMenuItem className="text-white hover:bg-gray-900 rounded-md cursor-pointer">
                       <Pin className="text-white" />
                       Pin to your profile
                     </DropdownMenuItem>
+
                     <DropdownMenuItem className="text-white hover:bg-gray-900 rounded-md cursor-pointer">
                       <ChartBar className="hover:text-black" />
                       View post activity

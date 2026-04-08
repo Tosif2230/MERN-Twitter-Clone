@@ -51,5 +51,3 @@ export async function updateUser(req, res) {
     return res.status(400).send({ error: error.message });
   }
 }
-
-//Delete User

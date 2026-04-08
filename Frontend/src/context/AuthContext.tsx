@@ -43,6 +43,8 @@ interface AuthContextType {
   logout: () => void;
   googleSignin: () => void;
   isLoading: boolean;
+  notificationsEnabled: boolean;
+  setNotificationsEnabled: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -60,6 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -247,6 +250,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         logout,
         isLoading,
         googleSignin,
+        notificationsEnabled,
+        setNotificationsEnabled,
       }}
     >
       {children}

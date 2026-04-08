@@ -5,6 +5,9 @@ import LoadingSpinner from "./Loading-spinner";
 import TweetCard from "./TweetCard";
 import TweetComposer from "./TweetComposer";
 import axiosInstance from "../lib/axiosInstance.js";
+import { db } from "../context/FireBase";
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { useAuth } from "../context/AuthContext";
 
 interface Tweet {
   _id: string;
@@ -88,6 +91,8 @@ const tweets: Tweet[] = [
 const Feed = () => {
   const [tweets, setTweets] = useState<any>([]);
   const [loading, setLoading] = useState(false);
+  const { notificationsEnabled } = useAuth();
+
   const fetchTweets = async () => {
     try {
       setLoading(true);
@@ -104,8 +109,34 @@ const Feed = () => {
     fetchTweets();
   }, []);
 
+  useEffect(() => {
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!notificationsEnabled) return;
+    const q = query(collection(db, "tweets"), orderBy("createdAt", "desc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          const tweet = change.doc.data();
+
+          if (tweet.hasKeyword) {
+            new Notification("Matched Tweet", {
+              body: tweet.content,
+            });
+          }
+        }
+      });
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const handleNewtweet = (newTweet: any) => {
-    setTweets((prev: any) => [newTweet,...prev]);
+    setTweets((prev: any) => [newTweet, ...prev]);
   };
 
   return (
@@ -140,7 +171,9 @@ const Feed = () => {
             </CardContent>
           </Card>
         ) : (
-          tweets.map((tweet: any) => <TweetCard key={tweet._id} tweet={tweet} />)
+          tweets.map((tweet: any) => (
+            <TweetCard key={tweet._id} tweet={tweet} />
+          ))
         )}
       </div>
     </div>

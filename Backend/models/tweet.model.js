@@ -3,6 +3,7 @@ const TweetSchema = mongoose.Schema({
   author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   content: { type: String, required: true },
   likes: { type: Number, default: 0 },
+  hasKeyword: { type: Boolean, default: false },
   comments: { type: Number, default: 0 },
   retweets: { type: Number, default: 0 },
   likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],

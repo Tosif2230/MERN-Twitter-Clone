@@ -9,6 +9,8 @@ import { Separator } from "./ui/separator";
 import axios from "axios";
 import { Label } from "./ui/label";
 import axiosInstance from "../lib/axiosInstance";
+import { db } from "../context/FireBase";
+import { addDoc, collection } from "firebase/firestore";
 
 const TweetComposer = ({ onTweetposted }: any) => {
   const { user } = useAuth();
@@ -27,6 +29,12 @@ const TweetComposer = ({ onTweetposted }: any) => {
         image: imageurl,
       };
       const res = await axiosInstance.post("/api/post", tweetData);
+
+      await addDoc(collection(db, "tweets"), {
+        content: res.data.content,
+        hasKeyword: res.data.hasKeyword ?? false,
+        createdAt: new Date(),
+      });
       onTweetposted(res.data);
       setContent("");
       setImageurl("");
