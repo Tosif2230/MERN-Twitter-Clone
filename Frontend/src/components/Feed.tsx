@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import { Card, CardContent } from "./ui/card";
 import LoadingSpinner from "./Loading-spinner";
@@ -92,6 +92,7 @@ const Feed = () => {
   const [tweets, setTweets] = useState<any>([]);
   const [loading, setLoading] = useState(false);
   const { notificationsEnabled } = useAuth();
+  const isInitialLoad = useRef(true);
 
   const fetchTweets = async () => {
     try {
@@ -119,6 +120,11 @@ const Feed = () => {
     if (!notificationsEnabled) return;
     const q = query(collection(db, "tweets"), orderBy("createdAt", "desc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
+      // Ignore Old Tweets
+      if (isInitialLoad.current) {
+        isInitialLoad.current = false;
+        return;
+      }
       snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
           const tweet = change.doc.data();
@@ -140,19 +146,19 @@ const Feed = () => {
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="sticky top-0 bg-black/90 backdrop-blur-md border-b border-gray-800 z-10">
+    <div className="min-h-screen w-full">
+      <div className="sticky top-0 bg-black/90 backdrop-blur-md border-b border-gray-800 z-10 px-2 sm:px-0">
         <Tabs defaultValue="foryou" className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-transparent border-b border-gray-800 rounded-none h-auto">
             <TabsTrigger
               value="foryou"
-              className="data-[state=active]:bg-transparent  data-[state=active]:text-white data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
+              className="data-[state=active]:bg-transparent  data-[state=active]:text-white data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-3 sm:py-4 text-sm sm:text-base font-semibold"
             >
               For you
             </TabsTrigger>
             <TabsTrigger
               value="following"
-              className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
+              className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-3 sm:py-4 text-sm sm:text-base font-semibold"
             >
               Following
             </TabsTrigger>
@@ -160,7 +166,7 @@ const Feed = () => {
         </Tabs>
       </div>
       <TweetComposer onTweetposted={handleNewtweet} />
-      <div className="divide-y divide-gray-800">
+      <div className="divide-y divide-gray-800 px-2 sm:px-0">
         {loading ? (
           <Card className="bg-black border-none">
             <CardContent className="py-12 text-center">
