@@ -1,4 +1,3 @@
-
 import TwitterLogo from "../TwitterLogo";
 import { Button } from "../ui/button";
 import {
@@ -66,7 +65,7 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
     },
   ];
   return (
-    <div className="flex flex-col h-screen w-64 border-r border-gray-800 bg-black sticky top-0">
+    <div className="flex flex-col h-screen w-20 lg:w-64 bg-black sticky top-0 px-2">
       <div className="p-4">
         <TwitterLogo size="lg" className="text-white" />
       </div>
@@ -76,13 +75,13 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
             <li key={item.name}>
               <Button
                 variant="ghost"
-                className={`w-full justify-start text-xl py-6 px-4 rounded-full hover:bg-stone-900 ${
+                className={`w-full justify-center lg:justify-start text-xl py-4 lg:py-6 px-2 lg:px-4 rounded-full hover:bg-stone-900 ${
                   item.current ? "font-bold" : "font-normal"
                 } text-white hover:text-white`}
                 onClick={() => onNavigate(item.page)}
               >
-                <item.icon className="mr-4 h-7 w-7" />
-                {item.name}
+                <item.icon className="h-7 w-7 lg:mr-4" />
+                <span className="hidden lg:inline">{item.name}</span>
                 {item.badge && (
                   <span className="ml-2 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     1
@@ -99,7 +98,7 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
         </div>
       </nav>
       {user && (
-        <div className="p-2 border-t border-gray-800">
+        <div className="p-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -111,7 +110,9 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
                   <AvatarFallback>{user.displayName[0]}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 text-left">
-                  <div className="text-white font-semibold">{user.displayName}</div>
+                  <div className="text-white font-semibold">
+                    {user.displayName}
+                  </div>
                   <div className="text-gray-400 text-sm">@{user.userName}</div>
                 </div>
                 <MoreHorizontal className="h-5 w-5 text-gray-400" />
@@ -123,7 +124,7 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-gray-800" />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="text-white hover:bg-gray-900"
                 onClick={logout}
               >
@@ -136,5 +137,5 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
       )}
     </div>
   );
-}
+};
 export default Sidebar;

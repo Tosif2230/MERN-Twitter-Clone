@@ -36,9 +36,9 @@ const suggestions = [
 
 export default function RightSidebar() {
   return (
-    <div className="w-80 space-y-2 sticky top-0">
+    <div className="w-full max-w-xs space-y-4 sticky top-0">
       {/* Search */}
-      <div className="sticky top-2 z-50 w-80 space-y-4 bg-black ">
+      <div className="sticky top-2 z-50 w-full space-y-4 bg-black">
         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
         <Input
           placeholder="Search"
@@ -47,7 +47,7 @@ export default function RightSidebar() {
       </div>
       {/* Subscribe to Premium */}
       <Card className="bg-black border-gray-800">
-        <CardContent className="p-4">
+        <CardContent className="p-4 ">
           <h3 className="text-white text-xl font-bold mb-2">
             Subscribe to Premium
           </h3>
@@ -60,14 +60,16 @@ export default function RightSidebar() {
           </Button>
         </CardContent>
       </Card>
-
       {/* Who to follow */}
       <Card className="bg-black border-gray-800">
         <CardContent className="p-4">
           <h3 className="text-white text-xl font-bold mb-4">You might like</h3>
           <div className="space-y-4">
             {suggestions.map((user) => (
-              <div key={user.id} className="flex items-center justify-between hover:bg-stone-950 rounded">
+              <div
+                key={user.id}
+                className="flex items-center justify-between hover:bg-stone-950 rounded"
+              >
                 <div className="flex items-center space-x-3">
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={user.avatar} alt={user.displayName} />
@@ -111,7 +113,6 @@ export default function RightSidebar() {
           </Button>
         </CardContent>
       </Card>
-
       {/* Footer */}
       <div className="p-4 text-xs text-gray-500 space-y-2">
         <div className="flex flex-wrap gap-x-3 gap-y-1">

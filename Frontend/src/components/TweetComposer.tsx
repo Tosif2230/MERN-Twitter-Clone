@@ -4,7 +4,15 @@ import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
-import { BarChart3, Calendar, Globe, Image, MapPin, Smile } from "lucide-react";
+import {
+  BarChart3,
+  Calendar,
+  Globe,
+  Image,
+  MapPin,
+  Mic,
+  Smile,
+} from "lucide-react";
 import { Separator } from "./ui/separator";
 import axios from "axios";
 import { Label } from "./ui/label";
@@ -74,8 +82,8 @@ const TweetComposer = ({ onTweetposted }: any) => {
   return (
     <Card className="bg-black border-gray-800 border-x-0 border-t-0 rounded-none">
       <CardContent className="p-4">
-        <div className="flex space-x-4">
-          <Avatar className="h-12 w-12">
+        <div className="flex space-x-3 sm:space-x-4">
+          <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
             <AvatarImage src={user.avatar} alt={user.displayName} />
             <AvatarFallback>{user.displayName}</AvatarFallback>
           </Avatar>
@@ -86,10 +94,17 @@ const TweetComposer = ({ onTweetposted }: any) => {
                 placeholder="What's happening?"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full max-w-full wrap-break-word whitespace-pre-wrap overflow-hidden bg-transparent border-none text-xl text-white placeholder-gray-500 resize-none min-h-10 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="w-full max-w-full break-words whitespace-pre-wrap overflow-hidden bg-transparent border-none text-base sm:text-xl text-white resize-none min-h-10 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-base sm:placeholder:text-xl placeholder-gray-500"
               />
-              <div className="flex items-center justify-between mt-4 flex-wrap gap-2">
-                <div className="flex items-center space-x-4 text-blue-400">
+
+              <div className="flex items-center gap-2 border-b border-gray-600 py-2 px-1 sm:px-2">
+                <Globe className="h-4 w-4 text-blue-400" />
+                <span className="text-sm text-blue-400 font-semibold">
+                  Everyone can reply
+                </span>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 gap-3">
+                <div className="flex items-center gap-1 sm:gap-3 text-blue-400 flex-wrap">
                   <Label
                     htmlFor="tweetImage"
                     className="p-2 rounded-full hover:bg-blue-900/20 cursor-pointer"
@@ -132,15 +147,16 @@ const TweetComposer = ({ onTweetposted }: any) => {
                   >
                     <MapPin className="h-5 w-5" />
                   </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="p-2 rounded-full hover:bg-blue-900/20"
+                  >
+                    <Mic className="h-5 w-5" />
+                  </Button>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <Globe className="h-4 w-4 text-blue-400" />
-                    <span className="text-sm text-blue-400 font-semibold">
-                      Everyone can reply
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     {characterCount > 0 && (
                       <div className="flex items-center space-x-2 ">
                         <div className="relative w-8 h-8">
@@ -189,13 +205,10 @@ const TweetComposer = ({ onTweetposted }: any) => {
                         )}
                       </div>
                     )}
-                    <Separator
-                      orientation="vertical"
-                      className="h-6 bg-gray-700"
-                    />
+                    <Separator orientation="vertical" className="h-6 bg-gray-700 hidden sm:block" />
                     <Button
                       type="submit"
-                      className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-700 disabled:text-gray-500 text-white font-semibold rounded-full px-6"
+                      className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-700 disabled:text-gray-500 text-white font-semibold rounded-full px-4 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base"
                       disabled={!content.trim() || isOverLimit || isLoading}
                     >
                       Post
