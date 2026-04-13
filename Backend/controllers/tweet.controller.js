@@ -5,7 +5,7 @@ const KEYWORDS = ["cricket", "science"];
 
 export async function postTweet(req, res) {
   try {
-    const { content, author } = req.body;
+    const { content, author, image, audio } = req.body;
     if (!content) {
       return res.status(400).json({ error: "Content Required" });
     }
@@ -14,6 +14,8 @@ export async function postTweet(req, res) {
     const tweet = new TweetModel({
       content,
       author,
+      image,
+      audio,
       hasKeyword,
       timestamp: new Date(),
     });

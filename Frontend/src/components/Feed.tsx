@@ -26,6 +26,7 @@ interface Tweet {
   liked?: boolean;
   retweeted?: boolean;
   image?: string;
+  audio?: string;
 }
 const tweets: Tweet[] = [
   {
@@ -142,6 +143,7 @@ const Feed = () => {
   }, []);
 
   const handleNewtweet = (newTweet: any) => {
+    // console.log("NEW TWEET:", newTweet);
     setTweets((prev: any) => [newTweet, ...prev]);
   };
 

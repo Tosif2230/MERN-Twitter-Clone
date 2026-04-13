@@ -1,11 +1,14 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import mongoose from "mongoose";
 import authRoute from "./routes/auth.route.js";
 import tweetRoute from "./routes/tweet.route.js"
+import audioRoute from "./routes/audio.route.js";
+import otpRoute from "./routes/otp.route.js";
+import { configureCloudinary } from "./services/cloudinary.service.js";
 
-dotenv.config();
 const app = express();
 const corsOptions = {
   origin: '*', // Allow from anywhere
@@ -24,6 +27,8 @@ app.get("/", (req, res) => {
 
 authRoute(app);
 tweetRoute(app);
+otpRoute(app)
+audioRoute(app)
 const port = process.env.PORT || 5000;
 const url = process.env.MONGODB_URL;
 
@@ -31,6 +36,7 @@ mongoose
   .connect(url)
   .then(() => {
     console.log("DB Connected Successfully");
+    configureCloudinary();
     app.listen(port, () => {
       console.log(`Server connects on port ${port}`);
     });

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -19,22 +19,39 @@ import { Label } from "./ui/label";
 import axiosInstance from "../lib/axiosInstance";
 import { db } from "../context/FireBase";
 import { addDoc, collection } from "firebase/firestore";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 
 const TweetComposer = ({ onTweetposted }: any) => {
   const { user } = useAuth();
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [imageurl, setImageurl] = useState("");
+  const [otp, setOtp] = useState("");
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [pendingAudio, setPendingAudio] = useState<any>(null);
+  const [audioUrl, setAudioUrl] = useState("");
+  const [isAudioUploaded, setIsAudioUploaded] = useState(false);
+  
   const maxLength = 200;
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+
+    console.log("FINAL AUDIO:", audioUrl);
+
     if (!user || !content.trim()) return;
+
+    if (pendingAudio && !audioUrl) {
+      alert("Upload audio first");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const tweetData = {
         author: user?._id,
         content,
         image: imageurl,
+        audio: audioUrl || null,
       };
       const res = await axiosInstance.post("/api/post", tweetData);
 
@@ -46,8 +63,11 @@ const TweetComposer = ({ onTweetposted }: any) => {
       onTweetposted(res.data);
       setContent("");
       setImageurl("");
+      setAudioUrl("");
+      setIsAudioUploaded(false);
     } catch (error) {
-      console.log(error);
+      alert("Something went wrong. Please try again.");
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -77,6 +97,93 @@ const TweetComposer = ({ onTweetposted }: any) => {
       console.log(error);
     } finally {
       setIsLoading(false);
+    }
+  };
+  const handleAudioUpload = async (e: any) => {
+    try {
+      setIsLoading(true);
+
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Time check
+      const hour = new Date().getHours();
+      if (hour <= 14 || hour >= 19) {
+        alert("Audio upload allowed only 2PM–7PM");
+        return;
+      }
+
+      // File Size check
+      if (file.size > 100 * 1024 * 1024) {
+        alert("Max 100MB allowed");
+        return;
+      }
+
+      const url = URL.createObjectURL(file);
+      const audio = new Audio(url);
+
+      audio.onloadedmetadata = async () => {
+        URL.revokeObjectURL(url);
+        try {
+          // Duration check
+          if (audio.duration > 300) {
+            alert("Max 5 minutes");
+            return;
+          }
+
+          // Send OTP
+          const res = await axiosInstance.post("/api/otp/send", {
+            email: user.email,
+          });
+
+
+          setPendingAudio({ file, duration: audio.duration });
+          setShowOtpModal(true);
+        } catch (error: any) {
+          console.log("OTP ERROR:", error.response?.data);
+          alert(error.response?.data?.message || "OTP send failed");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+    } catch (error) {
+      console.error("Error handling audio upload:", error);
+      alert("Something went wrong");
+      setIsLoading(false);
+    }
+  };
+  const handleVerifyAndUpload = async () => {
+
+    if (!pendingAudio) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("audio", pendingAudio.file);
+      formData.append("duration", pendingAudio.duration.toString());
+      formData.append("email", user.email);
+      formData.append("otp", otp);
+
+      const res = await axiosInstance.post(
+        "/api/audio/upload-audio",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+
+      setAudioUrl(res.data.audioUrl);
+      setIsAudioUploaded(true);
+
+      alert("Audio uploaded successfully");
+
+      setShowOtpModal(false);
+      setOtp("");
+      setPendingAudio(null);
+    } catch (error: any) {
+      console.log("UPLOAD ERROR:", error.response?.data);
+      alert(error.response?.data?.message || "Upload failed");
     }
   };
   return (
@@ -119,6 +226,19 @@ const TweetComposer = ({ onTweetposted }: any) => {
                       disabled={isLoading}
                     />
                   </Label>
+                  <Label
+                    htmlFor="tweetAudio"
+                    className="p-2 rounded-full hover:bg-blue-900/20 cursor-pointer"
+                  >
+                    <Mic className="h-5 w-5" />
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      id="tweetAudio"
+                      className="hidden"
+                      onChange={handleAudioUpload}
+                    />
+                  </Label>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -146,13 +266,6 @@ const TweetComposer = ({ onTweetposted }: any) => {
                     className="p-2 rounded-full hover:bg-blue-900/20"
                   >
                     <MapPin className="h-5 w-5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="p-2 rounded-full hover:bg-blue-900/20"
-                  >
-                    <Mic className="h-5 w-5" />
                   </Button>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
@@ -205,11 +318,19 @@ const TweetComposer = ({ onTweetposted }: any) => {
                         )}
                       </div>
                     )}
-                    <Separator orientation="vertical" className="h-6 bg-gray-700 hidden sm:block" />
+                    <Separator
+                      orientation="vertical"
+                      className="h-6 bg-gray-700 hidden sm:block"
+                    />
                     <Button
                       type="submit"
                       className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-700 disabled:text-gray-500 text-white font-semibold rounded-full px-4 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base"
-                      disabled={!content.trim() || isOverLimit || isLoading}
+                      disabled={
+                        !content.trim() ||
+                        isOverLimit ||
+                        isLoading ||
+                        (pendingAudio && !isAudioUploaded)
+                      }
                     >
                       Post
                     </Button>
@@ -220,6 +341,30 @@ const TweetComposer = ({ onTweetposted }: any) => {
           </div>
         </div>
       </CardContent>
+      <Dialog open={showOtpModal} onOpenChange={setShowOtpModal}>
+        <DialogContent className="bg-black text-white border-gray-700">
+          <DialogHeader>
+            <DialogTitle>Verify OTP</DialogTitle>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-4 mt-2">
+            <input
+              type="text"
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="p-2 rounded bg-gray-900 border border-gray-700 text-white outline-none"
+              maxLength={6}
+            />
+            <Button
+              onClick={handleVerifyAndUpload}
+              className="bg-blue-500 hover:bg-blue-600"
+            >
+              Verify & Upload
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

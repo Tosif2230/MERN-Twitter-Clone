@@ -23,7 +23,7 @@ import {
 
 const TweetCard = ({ tweet }: any) => {
   const { user } = useAuth();
-  const [tweetState, settweetState] = useState(tweet);
+  const [tweetState,settweetState] = useState(tweet)
   const [deleted, setDeleted] = useState(false);
   const liketweet = async (tweetid: string) => {
     try {
@@ -164,6 +164,12 @@ const TweetCard = ({ tweet }: any) => {
                   className="w-full h-auto max-h-80 sm:max-h-96 object-cover"
                 />
               </div>
+            )}
+            {tweetState.audio && (
+              <audio controls className="mt-2 w-full">
+                <source src={tweetState.audio} type="audio/mpeg" />
+                Your browser does not support the audio element.
+              </audio>
             )}
 
             <div className="flex items-center justify-between w-full max-w-md">
