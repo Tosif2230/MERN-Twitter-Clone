@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { Eye, EyeOff, Lock, Mail, User, X } from "lucide-react";
 
@@ -13,17 +14,42 @@ import LoadingSpinner from "./Loading-spinner";
 import { Separator } from "./ui/separator";
 import { useAuth } from "../context/AuthContext";
 
-const AuthModal = ({ isOpen, onClose, initialMode = "login" }: any) => {
+type AuthMode = "login" | "signup";
+
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  initialMode?: AuthMode;
+}
+
+const AuthModal = ({
+  isOpen,
+  onClose,
+  initialMode = "login",
+}: AuthModalProps) => {
   const { login, signup, isLoading } = useAuth();
-  const [mode, setMode] = useState<"login" | "signup">(initialMode);
+
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
+
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     userName: "",
     displayName: "",
   });
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode);
+      setFormData({ email: "", password: "", userName: "", displayName: "" });
+      setErrors({});
+      setShowPassword(false);
+    }
+  }, [initialMode, isOpen]);
 
   if (!isOpen) return null;
 
@@ -88,7 +114,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }: any) => {
       setErrors({ general: "Authentication failed. Please try again." });
     }
   };
-  
+
   const handleInputChange = (field: string, value: string) => {
     setFormData((prevData) => ({ ...prevData, [field]: value }));
     if (errors[field]) {
@@ -108,17 +134,17 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }: any) => {
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <Card className="w-full max-w-md bg-black border-gray-800 text-white">
-        <CardHeader className="relative pb-6">
+        <CardHeader className="relative pb-1">
           <Button
             variant="ghost"
             size="icon"
             className="absolute right-4 top-4 text-white hover:bg-gray-900"
             onClick={onClose}
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </Button>
           <div className="text-center">
-            <div className="mb-6 flex justify-center">
+            <div className="mb-4 flex justify-center">
               <TwitterLogo size="xl" className="text-white" />
             </div>
             <CardTitle className="text-2xl font-bold">
@@ -126,7 +152,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }: any) => {
             </CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4">
           {errors.general && (
             <div className="bg-red-900/20 border border-red-800 rounded-lg p-3 text-red-400 text-sm">
               {errors.general}
@@ -277,6 +303,19 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }: any) => {
                 {mode === "login" ? "Sign up" : "Log in"}
               </Button>
             </p>
+            {mode === "login" ? (
+              <p
+                className="text-gray-500 cursor-default text-sm mt-2 hover:underline"
+                onClick={() => {
+                  onClose();
+                  router.push("/forgot-password");
+                }}
+              >
+                Forgot Password?
+              </p>
+            ) : (
+              ""
+            )}
           </div>
           {mode === "signup" && (
             <div className="text-center text-xs text-gray-400">
