@@ -308,7 +308,7 @@ const AuthModal = ({
                 className="text-gray-500 cursor-default text-sm mt-2 hover:underline"
                 onClick={() => {
                   onClose();
-                  router.push("/forgot-password");
+                  router.push("/api/forgot-password");
                 }}
               >
                 Forgot Password?

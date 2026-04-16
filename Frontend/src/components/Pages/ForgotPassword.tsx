@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import TwitterLogo from "../TwitterLogo";
+import axiosInstance from "@/src/lib/axiosInstance";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -25,10 +26,14 @@ const ForgotPassword = () => {
     }
 
     try {
-      await sendPasswordResetEmail(auth, email);
-      setMessage("Password reset email sent! Check your inbox.");
+      const res = await axiosInstance.post("/api/forgot-password", { email });
+      if (res.data.message === "Allowed to reset your PASSWORD") {
+        console.log("Calling Firebase reset for:", email);
+        await sendPasswordResetEmail(auth, email);
+        setMessage("Password reset email sent! Check your inbox.");
+      }
     } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      setError(err.response?.data?.message || "Something went wrong");
     }
   };
 
