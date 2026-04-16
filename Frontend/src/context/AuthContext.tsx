@@ -11,6 +11,7 @@ import {
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "./FireBase";
 import axiosInstance from "../lib/axiosInstance.js";
+import { toast } from "react-toastify";
 
 interface User {
   _id: string;
@@ -99,10 +100,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (res.data) {
         setUser(res.data);
         localStorage.setItem("twitter-user", JSON.stringify(res.data));
+        toast.success("Logged in successfully");
       }
     } catch (error: any) {
-      console.error("Login Error:", error);
-      alert(error.message);
+      // console.error("Login Error:", error);
+      toast.error(error.message || "Login failed");
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -147,6 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (res.data) {
         setUser(res.data);
         localStorage.setItem("twitter-user", JSON.stringify(res.data));
+        toast.success("Account created successfully");
       }
       // const mockUser: User = {
       //   id: "1",
@@ -159,7 +163,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // };
     } catch (error: any) {
       console.error(error);
-      alert(error.message);
+      toast.error(error.message || "Login failed");
     } finally {
       setIsLoading(false);
     }
@@ -169,6 +173,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(null);
     await signOut(auth);
     localStorage.removeItem("twitter-user");
+    toast.success("Logged out successfully!");
   };
 
   const updateProfile = async (profileData: {
@@ -195,6 +200,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (res.data) {
       setUser(updatedUser);
       localStorage.setItem("twitter-user", JSON.stringify(updatedUser));
+      toast.success("Profile updated");
     }
 
     setIsLoading(false);
@@ -230,12 +236,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (userData) {
         setUser(userData);
         localStorage.setItem("twitter-user", JSON.stringify(userData));
+
+        toast.success("Signed in with Google");
       } else {
         throw new Error("Login/Register failed: No user data returned");
       }
     } catch (error: any) {
-      console.error("Google Sign-In Error:", error);
-      alert(error.response?.data?.message || error.message || "Login failed");
+      // console.error("Google Sign-In Error:", error);
+      toast.error(error.response?.data?.message || error.message || "Login failed");
     } finally {
       setIsLoading(false);
     }

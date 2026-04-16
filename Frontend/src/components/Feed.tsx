@@ -140,7 +140,7 @@ const Feed = () => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [notificationsEnabled]);
 
   const handleNewtweet = (newTweet: any) => {
     // console.log("NEW TWEET:", newTweet);

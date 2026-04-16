@@ -20,6 +20,7 @@ import axiosInstance from "../lib/axiosInstance";
 import { db } from "../context/FireBase";
 import { addDoc, collection } from "firebase/firestore";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { toast } from "react-toastify";
 
 const TweetComposer = ({ onTweetposted }: any) => {
   const { user } = useAuth();
@@ -31,7 +32,7 @@ const TweetComposer = ({ onTweetposted }: any) => {
   const [pendingAudio, setPendingAudio] = useState<any>(null);
   const [audioUrl, setAudioUrl] = useState("");
   const [isAudioUploaded, setIsAudioUploaded] = useState(false);
-  
+
   const maxLength = 200;
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -41,7 +42,7 @@ const TweetComposer = ({ onTweetposted }: any) => {
     if (!user || !content.trim()) return;
 
     if (pendingAudio && !audioUrl) {
-      alert("Upload audio first");
+      toast.warning("Upload audio first");
       return;
     }
 
@@ -53,7 +54,14 @@ const TweetComposer = ({ onTweetposted }: any) => {
         image: imageurl,
         audio: audioUrl || null,
       };
-      const res = await axiosInstance.post("/api/post", tweetData);
+      const res = await toast.promise(
+        axiosInstance.post("/api/post", tweetData),
+        {
+          pending: "Posting tweet...",
+          success: "Tweet posted successfully",
+          error: "Failed to post tweet",
+        },
+      );
 
       await addDoc(collection(db, "tweets"), {
         content: res.data.content,
@@ -66,7 +74,7 @@ const TweetComposer = ({ onTweetposted }: any) => {
       setAudioUrl("");
       setIsAudioUploaded(false);
     } catch (error) {
-      alert("Something went wrong. Please try again.");
+      toast.error("Failed to post tweet");
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -109,13 +117,14 @@ const TweetComposer = ({ onTweetposted }: any) => {
       // Time check
       const hour = new Date().getHours();
       if (hour <= 14 || hour >= 19) {
-        alert("Audio upload allowed only 2PM–7PM");
+        toast.error("Audio upload allowed only 2PM–7PM");
+        setIsLoading(false);
         return;
       }
 
       // File Size check
       if (file.size > 100 * 1024 * 1024) {
-        alert("Max 100MB allowed");
+        toast.error("Max 100MB allowed");
         return;
       }
 
@@ -127,7 +136,7 @@ const TweetComposer = ({ onTweetposted }: any) => {
         try {
           // Duration check
           if (audio.duration > 300) {
-            alert("Max 5 minutes");
+            toast.error("Max 5 minutes");
             return;
           }
 
@@ -135,25 +144,24 @@ const TweetComposer = ({ onTweetposted }: any) => {
           const res = await axiosInstance.post("/api/otp/send", {
             email: user.email,
           });
-
+          toast.success("OTP sent to your email");
 
           setPendingAudio({ file, duration: audio.duration });
           setShowOtpModal(true);
         } catch (error: any) {
           console.log("OTP ERROR:", error.response?.data);
-          alert(error.response?.data?.message || "OTP send failed");
+          toast.error(error.response?.data?.message || "OTP send failed");
         } finally {
           setIsLoading(false);
         }
       };
     } catch (error) {
       console.error("Error handling audio upload:", error);
-      alert("Something went wrong");
+      toast.error("Something went wrong");
       setIsLoading(false);
     }
   };
   const handleVerifyAndUpload = async () => {
-
     if (!pendingAudio) return;
 
     try {
@@ -163,27 +171,27 @@ const TweetComposer = ({ onTweetposted }: any) => {
       formData.append("email", user.email);
       formData.append("otp", otp);
 
-      const res = await axiosInstance.post(
-        "/api/audio/upload-audio",
-        formData,
-        {
+      const res = await toast.promise(
+        axiosInstance.post("/api/audio/upload-audio", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
+        }),
+        {
+          pending: "Uploading audio...",
+          success: "Audio uploaded successfully",
+          error: "Upload failed",
         },
       );
 
       setAudioUrl(res.data.audioUrl);
       setIsAudioUploaded(true);
-
-      alert("Audio uploaded successfully");
-
       setShowOtpModal(false);
       setOtp("");
       setPendingAudio(null);
     } catch (error: any) {
       console.log("UPLOAD ERROR:", error.response?.data);
-      alert(error.response?.data?.message || "Upload failed");
+      toast.error(error.response?.data?.message || "Upload failed");
     }
   };
   return (

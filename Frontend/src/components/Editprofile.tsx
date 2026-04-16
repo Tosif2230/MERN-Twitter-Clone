@@ -9,6 +9,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import axios from "axios";
 import LoadingSpinner from "./Loading-spinner";
+import { toast } from "react-toastify";
 
 const Editprofile = ({ isOpen, onClose }: any) => {
   const { user, updateProfile } = useAuth();
@@ -55,9 +56,10 @@ const Editprofile = ({ isOpen, onClose }: any) => {
     setIsLoading(true);
     try {
       await updateProfile(formData);
+      toast.success("Profile updated successfully");
       onClose();
     } catch (error) {
-      setError({ general: "Failed to update profile. Please try again." });
+      toast.error("Failed to update profile");
     } finally {
       setIsLoading(false);
     }
@@ -88,6 +90,7 @@ const Editprofile = ({ isOpen, onClose }: any) => {
       }
     } catch (error) {
       console.log(error);
+      toast.error("Image upload failed"); 
     } finally {
       setIsLoading(false);
     }

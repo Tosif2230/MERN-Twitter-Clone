@@ -111,7 +111,6 @@ const AuthModal = ({
       });
       setErrors({});
     } catch (error) {
-      setErrors({ general: "Authentication failed. Please try again." });
     }
   };
 

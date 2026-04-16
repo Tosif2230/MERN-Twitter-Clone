@@ -9,31 +9,28 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import TwitterLogo from "../TwitterLogo";
 import axiosInstance from "@/src/lib/axiosInstance";
+import { toast } from "react-toastify";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleReset = async () => {
-    setMessage("");
-    setError("");
-
     if (!email) {
-      setError("Please enter your email");
+      toast.error("Please enter your email");
       return;
     }
 
     try {
       const res = await axiosInstance.post("/api/forgot-password", { email });
+
       if (res.data.message === "Allowed to reset your PASSWORD") {
-        console.log("Calling Firebase reset for:", email);
+        // console.log("Calling Firebase reset for:", email);
         await sendPasswordResetEmail(auth, email);
-        setMessage("Password reset email sent! Check your inbox.");
+        toast.success("Password reset email sent! Check your inbox.");
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Something went wrong");
+      toast.error(err.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -61,22 +58,11 @@ const ForgotPassword = () => {
           <Button
             onClick={handleReset}
             className="w-full text-sm sm:text-base py-2 sm:py-3"
+            disabled={!email}
           >
             Reset Password
           </Button>
-
-          {message && (
-            <p className="text-green-500 text-xs sm:text-sm text-center">
-              {message}
-            </p>
-          )}
-
-          {error && (
-            <p className="text-red-500 text-xs sm:text-sm text-center">
-              {error}
-            </p>
-          )}
-
+          
           <Button
             variant="outline"
             className="w-full bg-black text-sm sm:text-base"
