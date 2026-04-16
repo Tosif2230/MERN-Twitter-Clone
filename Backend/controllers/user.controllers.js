@@ -51,3 +51,40 @@ export async function updateUser(req, res) {
     return res.status(400).send({ error: error.message });
   }
 }
+
+// Forgot Password
+export async function forgotPassword(req, res) {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email Required" });
+    }
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    const now = new Date();
+
+    if (user.resetPasswordRequestedAt) {
+      const lastDay = new Date(user.resetPasswordRequestedAt);
+
+      const sameDay = now.toDateString() === lastDay.toDateString();
+
+      if (sameDay) {
+        return res
+          .status(400)
+          .json({ message: "You can use this option only one time per day." });
+      }
+    }
+    user.resetPasswordRequestedAt = now;
+    await user.save();
+
+    return res.status(200).json({ message: "Allowed to reset your PASSWORD" });
+  } catch (error) {
+    console.error("Forgot Password Error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+}

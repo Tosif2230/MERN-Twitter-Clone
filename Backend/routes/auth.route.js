@@ -1,4 +1,9 @@
-import { loginUser, registerUser, updateUser } from "../controllers/user.controllers.js";
+import {
+  forgotPassword,
+  loginUser,
+  registerUser,
+  updateUser,
+} from "../controllers/user.controllers.js";
 
 export default function authRoute(app) {
   //Regester
@@ -9,4 +14,7 @@ export default function authRoute(app) {
 
   //Update Profile
   app.patch("/api/updateUser/:email", updateUser);
+
+  //Reset Password
+  app.post("/api/forgot-password", forgotPassword);
 }
