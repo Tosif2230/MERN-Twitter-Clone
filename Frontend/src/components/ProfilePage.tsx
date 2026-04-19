@@ -257,11 +257,6 @@ const ProfilePage = () => {
           </div>
           <div className="flex justify-between items-center">
             <Button
-              className="text-sm text-gray-400 cursor-pointer hover:border-b bg-transparent hover:bg-transparent  "
-            >
-              Tweet Plan
-            </Button>
-            <Button
               variant="ghost"
               size="sm"
               className="p-2 items-center rounded-lg bg-transparent hover:bg-transparent hover:border-b "

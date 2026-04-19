@@ -8,8 +8,9 @@ import ProfilePage from "../ProfilePage";
 import Notifications from "../Pages/Notifications";
 import Messages from "../Pages/Messages";
 import Bookmarks from "../Pages/Bookmarks";
-import { Bell, Home, MessagesSquare, User } from "lucide-react";
+import { Bell, CreditCard, Home, MessagesSquare, User } from "lucide-react";
 import TwitterLogo from "../TwitterLogo";
+import Subscription from "../Pages/Subscription";
 
 const Mainlayout = ({ children }: any) => {
   const { user, isLoading } = useAuth();
@@ -40,6 +41,7 @@ const Mainlayout = ({ children }: any) => {
         {currentPage === "notifications" && <Notifications />}
         {currentPage === "messages" && <Messages />}
         {currentPage === "bookmarks" && <Bookmarks />}
+        {currentPage === "subscription" && <Subscription />}
       </main>
       <div className="hidden xl:block w-80 p-4">
         <RightSidebar />
@@ -57,6 +59,9 @@ const Mainlayout = ({ children }: any) => {
       >
         <button className="p-2" onClick={() => setCurrentPage("home")}>
           <Home />
+        </button>
+        <button className="p-2" onClick={() => setCurrentPage("subscription")}>
+          <CreditCard />
         </button>
         <button className="p-2" onClick={() => setCurrentPage("notifications")}>
           <Bell />

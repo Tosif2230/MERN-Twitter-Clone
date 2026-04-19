@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
   Bell,
   Bookmark,
+  CreditCard,
   Home,
   LogOut,
   Mail,
@@ -50,6 +51,12 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
       icon: Bookmark,
       current: currentPage === "bookmarks",
       page: "bookmarks",
+    },
+    {
+      name: "Subscription",
+      icon: CreditCard,
+      current: currentPage === "subscription",
+      page: "subscription",
     },
     {
       name: "Profile",
