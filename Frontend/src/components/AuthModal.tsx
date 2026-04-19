@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Eye, EyeOff, Lock, Mail, User, X } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, Phone, User, X } from "lucide-react";
 
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -36,20 +36,29 @@ const AuthModal = ({
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    phone: "",
     userName: "",
     displayName: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isOpen) {
       setMode(initialMode);
-      setFormData({ email: "", password: "", userName: "", displayName: "" });
+      setFormData({
+        email: "",
+        password: "",
+        phone: "",
+        userName: "",
+        displayName: "",
+      });
       setErrors({});
       setShowPassword(false);
     }
   }, [initialMode, isOpen]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!isOpen) return null;
 
@@ -69,6 +78,12 @@ const AuthModal = ({
     }
 
     if (mode === "signup") {
+      if (!formData.phone.trim()) {
+        newErrors.phone = "Phone number is required";
+      } else if (!/^[+0-9\s()-]{7,20}$/.test(formData.phone)) {
+        newErrors.phone = "Please enter a valid phone number";
+      }
+
       if (!formData.userName.trim()) {
         newErrors.userName = "Username is required";
       } else if (formData.userName.length < 3) {
@@ -98,6 +113,7 @@ const AuthModal = ({
         await signup(
           formData.email,
           formData.password,
+          formData.phone,
           formData.userName,
           formData.displayName,
         );
@@ -106,12 +122,12 @@ const AuthModal = ({
       setFormData({
         email: "",
         password: "",
+        phone: "",
         userName: "",
         displayName: "",
       });
       setErrors({});
-    } catch (error) {
-    }
+    } catch {}
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -126,6 +142,7 @@ const AuthModal = ({
     setFormData({
       email: "",
       password: "",
+      phone: "",
       userName: "",
       displayName: "",
     });
@@ -227,6 +244,30 @@ const AuthModal = ({
               )}
             </div>
 
+            {mode === "signup" && (
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="text-white">
+                  Phone Number
+                </Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="Enter your phone number"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      handleInputChange("phone", e.target.value)
+                    }
+                    className="pl-10 bg-transparent border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                  />
+                </div>
+                {errors.phone && (
+                  <p className="text-red-400 text-sm">{errors.phone}</p>
+                )}
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="password" className="text-white">
                 Password
@@ -307,7 +348,7 @@ const AuthModal = ({
                 className="text-gray-500 cursor-default text-sm mt-2 hover:underline"
                 onClick={() => {
                   onClose();
-                  router.push("/api/forgot-password");
+                  router.push("/forgot-password");
                 }}
               >
                 Forgot Password?

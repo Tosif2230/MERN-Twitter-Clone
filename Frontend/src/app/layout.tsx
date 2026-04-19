@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Slide } from "react-toastify/unstyled";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,9 +35,10 @@ export default function RootLayout({
       >
         {children}
          <ToastContainer
-          position="top-right"
+          position="top-center"
           autoClose={3000}
           theme="dark"
+          transition={Slide}
         />
       </body>
     </html>

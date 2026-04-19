@@ -7,6 +7,7 @@ import {
   Heart,
   MessageCircle,
   MoreHorizontal,
+  MoreVertical,
   Pin,
   Repeat2,
   Share,
@@ -23,7 +24,7 @@ import {
 
 const TweetCard = ({ tweet }: any) => {
   const { user } = useAuth();
-  const [tweetState,settweetState] = useState(tweet)
+  const [tweetState, settweetState] = useState(tweet);
   const [deleted, setDeleted] = useState(false);
   const liketweet = async (tweetid: string) => {
     try {
@@ -104,13 +105,36 @@ const TweetCard = ({ tweet }: any) => {
               <span className="text-gray-500 text-sm truncate max-w-[120px] sm:max-w-none">
                 .
               </span>
-              <span className="text-gray-500 text-sm truncate max-w-[120px] sm:max-w-none">
-                {tweetState.timestamp &&
-                  new Date(tweetState.timestamp).toLocaleDateString("en-us", {
-                    month: "long",
-                    year: "numeric",
-                  })}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 text-sm sm:hidden">
+                  {tweetState.timestamp &&
+                    new Date(tweetState.timestamp).toLocaleTimeString("en-us", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                </span>
+                <span
+                  className="text-gray-500 text-sm hidden sm:block"
+                  title={
+                    tweetState.timestamp &&
+                    new Date(tweetState.timestamp).toLocaleString("en-us", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })
+                  }
+                >
+                  {tweetState.timestamp &&
+                    new Date(tweetState.timestamp).toLocaleDateString("en-us", {
+                      month: "long",
+                      year: "numeric",
+                    })}
+                </span>
+              </div>
               <div className="ml-auto">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -120,7 +144,8 @@ const TweetCard = ({ tweet }: any) => {
                       className="p-1 rounded-full bg-transparent hover:bg-stone-900"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <MoreHorizontal className="w-5 h-5 text-gray-600" />
+                      <MoreHorizontal className="w-5 h-5 text-gray-600 hidden sm:block" />
+                      <MoreVertical className="w-5 h-5 text-gray-600 block sm:hidden" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
@@ -172,7 +197,7 @@ const TweetCard = ({ tweet }: any) => {
               </audio>
             )}
 
-            <div className="flex items-center justify-between w-full max-w-md">
+            <div className="flex items-center justify-between w-full max-w-md mt-3">
               <Button
                 variant="ghost"
                 size="sm"

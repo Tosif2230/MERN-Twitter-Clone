@@ -255,18 +255,25 @@ const ProfilePage = () => {
               0 Followers
             </span>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="p-2 items-center rounded-full bg-transparent hover:bg-transparent"
-           onClick={() => setNotificationsEnabled((prev:any) => !prev)}
-          >
-            {notificationsEnabled ? (
-              <Bell className="text-white" />
-            ) : (
-              <BellOff className="text-red-500" />
-            )}
-          </Button>
+          <div className="flex justify-between items-center">
+            <Button
+              className="text-sm text-gray-400 cursor-pointer hover:border-b bg-transparent hover:bg-transparent  "
+            >
+              Tweet Plan
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="p-2 items-center rounded-lg bg-transparent hover:bg-transparent hover:border-b "
+              onClick={() => setNotificationsEnabled((prev: any) => !prev)}
+            >
+              {notificationsEnabled ? (
+                <Bell className="text-white" />
+              ) : (
+                <BellOff className="text-red-500" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
       {/* Tabs */}

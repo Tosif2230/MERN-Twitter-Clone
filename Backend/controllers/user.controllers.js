@@ -55,12 +55,17 @@ export async function updateUser(req, res) {
 // Forgot Password
 export async function forgotPassword(req, res) {
   try {
-    const { email } = req.body;
+    const { email, phone } = req.body;
+    const trimmedEmail = email?.trim();
+    const trimmedPhone = phone?.trim();
 
-    if (!email) {
-      return res.status(400).json({ message: "Email Required" });
+    if (!trimmedEmail && !trimmedPhone) {
+      return res.status(400).json({ message: "Email or phone number required" });
     }
-    const user = await UserModel.findOne({ email });
+
+    const user = await UserModel.findOne(
+      trimmedEmail ? { email: trimmedEmail } : { phone: trimmedPhone },
+    );
 
     if (!user) {
       return res.status(400).json({ message: "User not found" });
@@ -82,7 +87,10 @@ export async function forgotPassword(req, res) {
     user.resetPasswordRequestedAt = now;
     await user.save();
 
-    return res.status(200).json({ message: "Allowed to reset your PASSWORD" });
+    return res.status(200).json({
+      message: "Allowed to reset your PASSWORD",
+      resetEmail: user.email,
+    });
   } catch (error) {
     console.error("Forgot Password Error:", error);
     return res.status(500).json({ message: "Server error" });

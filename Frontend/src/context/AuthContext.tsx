@@ -21,6 +21,7 @@ interface User {
   bio?: string;
   joinedDate: string;
   email: string;
+  phone?: string;
   location: string;
   website: string;
 }
@@ -31,6 +32,7 @@ interface AuthContextType {
   signup: (
     email: string,
     password: string,
+    phone: string,
     userName: string,
     displayName: string,
   ) => Promise<void>;
@@ -123,6 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const signup = async (
     email: string,
     password: string,
+    phone: string,
     userName: string,
     displayName: string,
   ) => {
@@ -144,6 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           user.photoURL ||
           "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgYpOOYgMxD_FO9y7jYv2F_DwMnnVMBj8rWQ&s",
         email: user.email,
+        phone,
       };
       const res = await axiosInstance.post("/api/register", newUser);
 
