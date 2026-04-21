@@ -7,6 +7,7 @@ import authRoute from "./routes/auth.route.js";
 import tweetRoute from "./routes/tweet.route.js"
 import audioRoute from "./routes/audio.route.js";
 import otpRoute from "./routes/otp.route.js";
+import subscriptionRoute from "./routes/subscription.route.js";
 import { configureCloudinary } from "./services/cloudinary.service.js";
 
 const app = express();
@@ -29,6 +30,7 @@ authRoute(app);
 tweetRoute(app);
 otpRoute(app)
 audioRoute(app)
+subscriptionRoute(app)
 const port = process.env.PORT || 5000;
 const url = process.env.MONGODB_URL;
 

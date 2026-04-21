@@ -24,6 +24,10 @@ interface User {
   phone?: string;
   location: string;
   website: string;
+  subscriptionPlan?: string;
+  subscriptionPrice?: number;
+  subscriptionPaymentId?: string;
+  subscriptionDate?: string;
 }
 
 interface AuthContextType {

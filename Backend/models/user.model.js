@@ -9,6 +9,10 @@ const userSchema = mongoose.Schema({
   bio: { type: String, default: "" },
   website: { type: String, default: "" },
   location: { type: String, default: "" },
+  subscriptionPlan: { type: String, default: "Free" },
+  subscriptionPrice: { type: Number, default: 0 },
+  subscriptionPaymentId: { type: String, default: "" },
+  subscriptionDate: { type: Date, default: null },
   resetPasswordRequestedAt: { type: Date, default: null },
   joinedDate: { type: Date, default: Date.now },
 });
