@@ -7,7 +7,17 @@ export async function registerUser(req, res) {
     if (existingUser) {
       return res.status(200).send(existingUser);
     }
-    const newUser = new UserModel(req.body);
+    const joinedDate = new Date();
+    const expiresAt = new Date(joinedDate);
+    expiresAt.setMonth(expiresAt.getMonth() + 1);
+
+    const newUser = new UserModel({
+      ...req.body,
+      subscriptionPlan: req.body.subscriptionPlan || "Free",
+      subscriptionPrice: req.body.subscriptionPrice || 0,
+      subscriptionDate: req.body.subscriptionDate || joinedDate,
+      subscriptionExpiresAt: req.body.subscriptionExpiresAt || expiresAt,
+    });
     await newUser.save();
 
     return res.status(201).send(newUser);

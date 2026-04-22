@@ -1,4 +1,9 @@
 import TweetModel from "../models/tweet.model.js";
+import UserModel from "../models/user.model.js";
+import {
+  getCurrentPlan,
+  getTweetUsage,
+} from "../services/subscription.service.js";
 
 //Post Tweet
 const KEYWORDS = ["cricket", "science"];
@@ -9,6 +14,24 @@ export async function postTweet(req, res) {
     if (!content) {
       return res.status(400).json({ error: "Content Required" });
     }
+
+    const user = await UserModel.findById(author);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const currentPlan = getCurrentPlan(user);
+    const usedTweets = await getTweetUsage(user);
+
+    if (
+      currentPlan.tweetLimit !== Infinity &&
+      usedTweets >= currentPlan.tweetLimit
+    ) {
+      return res.status(403).json({
+        error: `Your ${currentPlan.name} plan allows only ${currentPlan.tweetLimit} tweet${currentPlan.tweetLimit > 1 ? "s" : ""}. Upgrade your plan to post more.`,
+      });
+    }
+
     const hasKeyword = KEYWORDS.some((k) => content.toLowerCase().includes(k));
 
     const tweet = new TweetModel({

@@ -11,8 +11,10 @@ const userSchema = mongoose.Schema({
   location: { type: String, default: "" },
   subscriptionPlan: { type: String, default: "Free" },
   subscriptionPrice: { type: Number, default: 0 },
+  subscriptionOrderId: { type: String, default: "" },
   subscriptionPaymentId: { type: String, default: "" },
   subscriptionDate: { type: Date, default: null },
+  subscriptionExpiresAt: { type: Date, default: null },
   resetPasswordRequestedAt: { type: Date, default: null },
   joinedDate: { type: Date, default: Date.now },
 });

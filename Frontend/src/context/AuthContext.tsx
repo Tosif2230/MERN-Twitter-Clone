@@ -26,8 +26,10 @@ interface User {
   website: string;
   subscriptionPlan?: string;
   subscriptionPrice?: number;
+  subscriptionOrderId?: string;
   subscriptionPaymentId?: string;
   subscriptionDate?: string;
+  subscriptionExpiresAt?: string;
 }
 
 interface AuthContextType {
@@ -49,6 +51,7 @@ interface AuthContextType {
   }) => Promise<void>;
   logout: () => void;
   googleSignin: () => void;
+  refreshUser: (email?: string) => Promise<void>;
   isLoading: boolean;
   notificationsEnabled: boolean;
   setNotificationsEnabled: React.Dispatch<React.SetStateAction<boolean>>;
@@ -70,6 +73,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  const refreshUser = async (email?: string) => {
+    const targetEmail = email || auth.currentUser?.email || user?.email;
+    if (!targetEmail) return;
+
+    const res = await axiosInstance.get("/api/login", {
+      params: { email: targetEmail },
+    });
+
+    if (res.data) {
+      setUser(res.data);
+      localStorage.setItem("twitter-user", JSON.stringify(res.data));
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -100,12 +117,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const usercred = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = usercred.user;
-      const res = await axiosInstance.get("/api/login", {
-        params: { email: firebaseUser.email },
-      });
-      if (res.data) {
-        setUser(res.data);
-        localStorage.setItem("twitter-user", JSON.stringify(res.data));
+      if (firebaseUser.email) {
+        await refreshUser(firebaseUser.email);
         toast.success("Logged in successfully");
       }
     } catch (error: any) {
@@ -266,6 +279,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         logout,
         isLoading,
         googleSignin,
+        refreshUser,
         notificationsEnabled,
         setNotificationsEnabled,
       }}
