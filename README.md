@@ -24,15 +24,19 @@ This project is developed as a **Internship Capstone Project** for Full Stack De
 ### Frontend
 - React (Next.JS)
 - Tailwind CSS
-- lucide-react
-- shadcn
+- Lucide-react
+- Shadcn
+- Firebase
+- React-Toastify
 
 ### Backend
 - Node.js
 - Express.js
 - MongoDB (Mongoose)
-- Firebase
-
+- Cloudinary
+- Nodemailer
+- Multer
+- Razorpay
 
 ---
 
@@ -100,10 +104,35 @@ npm run dev
 ## ⚙️ Environment Variables
 
 ```
+Create a `.env` file in the Frontend root folder then put your env. variables like below example:
+
+- NEXT_PUBLIC_BACKEND_URL:your-backend-url || rander url
+- NEXT_PUBLIC_FIREBASE_API_KEY=your_Firebase_API_Key.
+```
+```
 Create a `.env` file in the backend root folder then put your env. variables like below example:
 
 - PORT=5050
-- DB_URL=your_mongodb_connection_string
+- MONGODB_URL=your_mongodb_connection_string
+
+- MAIL_USER=Your mail
+- MAIL_PASS=your gmail App pass key (manage your gmail search App Passwords then generate app password and put here )
+
+- CLOUDINARY_CLOUD_NAME=
+- CLOUDINARY_API_KEY=
+- CLOUDINARY_API_SECRET=
+
+- RAZORPAY_KEY_ID=test-ID by razor pay API
+- RAZORPAY_KEY_SECRET=test-KEY by razor pay API
+```
+
+```
+## Razor Pay Test Card 
+
+Card - 5267 3181 8797 5449
+Expiry: any future date (e.g., 12/30)
+CVV : any 3 digit
+OTP : any 6 digit
 ```
 
 ## Give a Star to repo.

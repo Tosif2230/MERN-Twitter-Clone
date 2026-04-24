@@ -17,8 +17,8 @@ const Editprofile = ({ isOpen, onClose }: any) => {
   const [formData, setFormData] = useState({
     displayName: user?.displayName || "",
     bio: user?.bio || "",
-    location: "Earth",
-    website: "example.com",
+    location: user?.location || "Earth",
+    website: user?.website || "example.com",
     avatar: user?.avatar || "",
   });
   const [error, setError] = useState<any>({});
@@ -90,7 +90,7 @@ const Editprofile = ({ isOpen, onClose }: any) => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Image upload failed"); 
+      toast.error("Image upload failed");
     } finally {
       setIsLoading(false);
     }

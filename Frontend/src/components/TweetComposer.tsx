@@ -200,7 +200,7 @@ const TweetComposer = ({ onTweetposted }: any) => {
         <div className="flex space-x-3 sm:space-x-4">
           <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
             <AvatarImage src={user.avatar} alt={user.displayName} />
-            <AvatarFallback>{user.displayName}</AvatarFallback>
+            <AvatarFallback>{user.displayName[0]}</AvatarFallback>
           </Avatar>
 
           <div className="flex-1 min-w-0">
