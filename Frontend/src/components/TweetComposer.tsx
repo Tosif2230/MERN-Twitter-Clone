@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -21,9 +21,11 @@ import { db } from "../context/FireBase";
 import { addDoc, collection } from "firebase/firestore";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const TweetComposer = ({ onTweetposted }: any) => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [imageurl, setImageurl] = useState("");
@@ -34,15 +36,16 @@ const TweetComposer = ({ onTweetposted }: any) => {
   const [isAudioUploaded, setIsAudioUploaded] = useState(false);
 
   const maxLength = 200;
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    console.log("FINAL AUDIO:", audioUrl);
+    // console.log("FINAL AUDIO:", audioUrl);
 
     if (!user || !content.trim()) return;
 
     if (pendingAudio && !audioUrl) {
-      toast.warning("Upload audio first");
+      toast.warning(t("composer.uploadAudioFirst"));
       return;
     }
 
@@ -54,14 +57,11 @@ const TweetComposer = ({ onTweetposted }: any) => {
         image: imageurl,
         audio: audioUrl || null,
       };
-      const res = await toast.promise(
-        axiosInstance.post("/api/post", tweetData),
-        {
-          pending: "Posting tweet...",
-          success: "Tweet posted successfully",
-          error: "Failed to post tweet",
-        },
-      );
+      const res = await toast.promise(axiosInstance.post("/api/post", tweetData), {
+        pending: t("composer.posting"),
+        success: t("composer.postSuccess"),
+        error: t("composer.postError"),
+      });
 
       await addDoc(collection(db, "tweets"), {
         content: res.data.content,
@@ -74,15 +74,17 @@ const TweetComposer = ({ onTweetposted }: any) => {
       setAudioUrl("");
       setIsAudioUploaded(false);
     } catch (error) {
-      toast.error("Failed to post tweet");
+      toast.error(t("composer.postError"));
       console.error(error);
     } finally {
       setIsLoading(false);
     }
   };
+
   const characterCount = content.length;
   const isOverLimit = characterCount > maxLength;
   const isNearLimit = characterCount > maxLength * 0.8;
+
   if (!user) return null;
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,6 +109,7 @@ const TweetComposer = ({ onTweetposted }: any) => {
       setIsLoading(false);
     }
   };
+
   const handleAudioUpload = async (e: any) => {
     try {
       setIsLoading(true);
@@ -117,14 +120,15 @@ const TweetComposer = ({ onTweetposted }: any) => {
       // Time check
       const hour = new Date().getHours();
       if (hour <= 14 || hour >= 19) {
-        toast.error("Audio upload allowed only 2PM–7PM");
+        toast.error(t("composer.audioTime"));
         setIsLoading(false);
         return;
       }
 
       // File Size check
       if (file.size > 100 * 1024 * 1024) {
-        toast.error("Max 100MB allowed");
+        toast.error(t("composer.audioSize"));
+        setIsLoading(false);
         return;
       }
 
@@ -136,7 +140,7 @@ const TweetComposer = ({ onTweetposted }: any) => {
         try {
           // Duration check
           if (audio.duration > 300) {
-            toast.error("Max 5 minutes");
+            toast.error(t("composer.audioMinutes"));
             return;
           }
 
@@ -144,23 +148,24 @@ const TweetComposer = ({ onTweetposted }: any) => {
           const res = await axiosInstance.post("/api/otp/send", {
             email: user.email,
           });
-          toast.success("OTP sent to your email");
+          toast.success(t("composer.otpSent"));
 
           setPendingAudio({ file, duration: audio.duration });
           setShowOtpModal(true);
         } catch (error: any) {
           console.log("OTP ERROR:", error.response?.data);
-          toast.error(error.response?.data?.message || "OTP send failed");
+          toast.error(error.response?.data?.message || t("composer.otpError"));
         } finally {
           setIsLoading(false);
         }
       };
     } catch (error) {
       console.error("Error handling audio upload:", error);
-      toast.error("Something went wrong");
+      toast.error(t("composer.genericError"));
       setIsLoading(false);
     }
   };
+
   const handleVerifyAndUpload = async () => {
     if (!pendingAudio) return;
 
@@ -178,9 +183,9 @@ const TweetComposer = ({ onTweetposted }: any) => {
           },
         }),
         {
-          pending: "Uploading audio...",
-          success: "Audio uploaded successfully",
-          error: "Upload failed",
+          pending: t("composer.uploadAudio"),
+          success: t("composer.uploadSuccess"),
+          error: t("composer.uploadFailed"),
         },
       );
 
@@ -191,9 +196,10 @@ const TweetComposer = ({ onTweetposted }: any) => {
       setPendingAudio(null);
     } catch (error: any) {
       console.log("UPLOAD ERROR:", error.response?.data);
-      toast.error(error.response?.data?.message || "Upload failed");
+      toast.error(error.response?.data?.message || t("composer.uploadFailed"));
     }
   };
+
   return (
     <Card className="bg-black border-gray-800 border-x-0 border-t-0 rounded-none">
       <CardContent className="p-4">
@@ -206,7 +212,7 @@ const TweetComposer = ({ onTweetposted }: any) => {
           <div className="flex-1 min-w-0">
             <form onSubmit={handleSubmit}>
               <Textarea
-                placeholder="What's happening?"
+                placeholder={t("composer.placeholder")}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 className="w-full max-w-full break-words whitespace-pre-wrap overflow-hidden bg-transparent border-none text-base sm:text-xl text-white resize-none min-h-10 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-base sm:placeholder:text-xl placeholder-gray-500"
@@ -215,7 +221,7 @@ const TweetComposer = ({ onTweetposted }: any) => {
               <div className="flex items-center gap-2 border-b border-gray-600 py-2 px-1 sm:px-2">
                 <Globe className="h-4 w-4 text-blue-400" />
                 <span className="text-sm text-blue-400 font-semibold">
-                  Everyone can reply
+                  {t("composer.everyoneReply")}
                 </span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 gap-3">
@@ -340,7 +346,7 @@ const TweetComposer = ({ onTweetposted }: any) => {
                         (pendingAudio && !isAudioUploaded)
                       }
                     >
-                      Post
+                      {t("composer.post")}
                     </Button>
                   </div>
                 </div>
@@ -352,13 +358,13 @@ const TweetComposer = ({ onTweetposted }: any) => {
       <Dialog open={showOtpModal} onOpenChange={setShowOtpModal}>
         <DialogContent className="bg-black text-white border-gray-700">
           <DialogHeader>
-            <DialogTitle>Verify OTP</DialogTitle>
+            <DialogTitle>{t("composer.verifyOtp")}</DialogTitle>
           </DialogHeader>
 
           <div className="flex flex-col gap-4 mt-2">
             <input
               type="text"
-              placeholder="Enter OTP"
+              placeholder={t("composer.enterOtp")}
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
               className="p-2 rounded bg-gray-900 border border-gray-700 text-white outline-none"
@@ -368,7 +374,7 @@ const TweetComposer = ({ onTweetposted }: any) => {
               onClick={handleVerifyAndUpload}
               className="bg-blue-500 hover:bg-blue-600"
             >
-              Verify & Upload
+              {t("composer.verifyUpload")}
             </Button>
           </div>
         </DialogContent>

@@ -12,6 +12,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "./FireBase";
 import axiosInstance from "../lib/axiosInstance.js";
 import { toast } from "react-toastify";
+import i18n from "../i18n";
 
 interface User {
   _id: string;
@@ -101,7 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             localStorage.setItem("twitter-user", JSON.stringify(res.data));
           }
         } catch (error) {
-          console.log("Failed to fetch user", error);
+          console.log(i18n.t("auth.fetchUserFailed"), error);
         }
       } else {
         setUser(null);
@@ -119,11 +120,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const firebaseUser = usercred.user;
       if (firebaseUser.email) {
         await refreshUser(firebaseUser.email);
-        toast.success("Logged in successfully");
+        toast.success(i18n.t("auth.loginSuccess"));
       }
     } catch (error: any) {
       // console.error("Login Error:", error);
-      toast.error(error.message || "Login failed");
+      toast.error(error.message || i18n.t("auth.loginFailed"));
       throw error;
     } finally {
       setIsLoading(false);
@@ -171,7 +172,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (res.data) {
         setUser(res.data);
         localStorage.setItem("twitter-user", JSON.stringify(res.data));
-        toast.success("Account created successfully");
+        toast.success(i18n.t("auth.signupSuccess"));
       }
       // const mockUser: User = {
       //   id: "1",
@@ -184,7 +185,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // };
     } catch (error: any) {
       console.error(error);
-      toast.error(error.message || "Login failed");
+      toast.error(error.message || i18n.t("auth.loginFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -194,7 +195,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(null);
     await signOut(auth);
     localStorage.removeItem("twitter-user");
-    toast.success("Logged out successfully!");
+    toast.success(i18n.t("auth.logoutSuccess"));
   };
 
   const updateProfile = async (profileData: {
@@ -221,7 +222,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (res.data) {
       setUser(updatedUser);
       localStorage.setItem("twitter-user", JSON.stringify(updatedUser));
-      toast.success("Profile updated");
     }
 
     setIsLoading(false);
@@ -235,7 +235,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const firebaseUser = result.user;
 
       if (!firebaseUser?.email) {
-        throw new Error("No email found in Google account");
+        throw new Error(i18n.t("auth.googleNoEmail"));
       }
 
       let userData;
@@ -247,7 +247,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       } catch {
         const newUser = {
           userName: firebaseUser.email.split("@")[0],
-          displayName: firebaseUser.displayName || "User",
+          displayName: firebaseUser.displayName || i18n.t("auth.googleDefaultName"),
           avatar: firebaseUser.photoURL || "",
           email: firebaseUser.email,
         };
@@ -258,13 +258,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setUser(userData);
         localStorage.setItem("twitter-user", JSON.stringify(userData));
 
-        toast.success("Signed in with Google");
+        toast.success(i18n.t("auth.googleSuccess"));
       } else {
-        throw new Error("Login/Register failed: No user data returned");
+        throw new Error(i18n.t("auth.userDataMissing"));
       }
-    } catch (error: any) {
+    } catch (error: any) { 
       // console.error("Google Sign-In Error:", error);
-      toast.error(error.response?.data?.message || error.message || "Login failed");
+      toast.error(
+        error.response?.data?.message || error.message || i18n.t("auth.loginFailed"),
+      );
     } finally {
       setIsLoading(false);
     }

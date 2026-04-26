@@ -11,6 +11,8 @@ import { Button } from "../ui/button";
 import TwitterLogo from "../TwitterLogo";
 import axiosInstance from "@/src/lib/axiosInstance";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
+import LanguageSelector from "../language/LanguageSelector";
 
 type RecoveryMethod = "email" | "phone";
 
@@ -19,9 +21,7 @@ const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const generateLetterPassword = (length = 12) => {
   const values = new Uint32Array(length);
   window.crypto.getRandomValues(values);
-  return Array.from(values, (value) => letters[value % letters.length]).join(
-    "",
-  );
+  return Array.from(values, (value) => letters[value % letters.length]).join("");
 };
 
 const ForgotPassword = () => {
@@ -30,6 +30,7 @@ const ForgotPassword = () => {
   const [generatedPassword, setGeneratedPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handleReset = async () => {
     const trimmedIdentifier = identifier.trim();
@@ -37,8 +38,8 @@ const ForgotPassword = () => {
     if (!trimmedIdentifier) {
       toast.error(
         recoveryMethod === "email"
-          ? "Please enter your email"
-          : "Please enter your phone number",
+          ? t("forgotPassword.enterEmail")
+          : t("forgotPassword.enterPhone"),
       );
       return;
     }
@@ -52,10 +53,10 @@ const ForgotPassword = () => {
 
       if (res.data.message === "Allowed to reset your PASSWORD") {
         await sendPasswordResetEmail(auth, res.data.resetEmail);
-        toast.success("Password reset email sent! Check your inbox.");
+        toast.success(t("forgotPassword.resetSent"));
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Something went wrong");
+      toast.error(err.response?.data?.message || t("forgotPassword.wrong"));
     } finally {
       setIsSubmitting(false);
     }
@@ -64,24 +65,27 @@ const ForgotPassword = () => {
   const handleGeneratePassword = () => {
     const password = generateLetterPassword();
     setGeneratedPassword(password);
-    toast.success("Generated a letters-only password");
+    toast.success(t("forgotPassword.generated"));
   };
 
   const handleCopyPassword = async () => {
     if (!generatedPassword) return;
     await navigator.clipboard.writeText(generatedPassword);
-    toast.success("Password copied");
+    toast.success(t("forgotPassword.copied"));
   };
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4 py-6 sm:px-6 lg:px-8">
       <Card className="w-full max-w-sm sm:max-w-md md:max-w-lg bg-black border-gray-800 text-white shadow-xl rounded-2xl">
         <CardHeader className="pb-2">
+          <div className="mb-4 flex justify-end">
+            <LanguageSelector className="w-48 border-gray-700 bg-black text-white" />
+          </div>
           <div className="mb-3 flex justify-center">
             <TwitterLogo size="lg" className="text-white sm:size-xl" />
           </div>
           <CardTitle className="text-xl sm:text-2xl font-bold text-gray-400">
-            Forgot Password
+            {t("forgotPassword.title")}
           </CardTitle>
         </CardHeader>
 
@@ -98,7 +102,7 @@ const ForgotPassword = () => {
                 setIdentifier("");
               }}
             >
-              Email <Mail />
+              {t("forgotPassword.email")} <Mail />
             </Button>
             <Button
               type="button"
@@ -111,7 +115,7 @@ const ForgotPassword = () => {
                 setIdentifier("");
               }}
             >
-              Phone <Phone />
+              {t("forgotPassword.phone")} <Phone />
             </Button>
           </div>
 
@@ -119,8 +123,8 @@ const ForgotPassword = () => {
             type={recoveryMethod === "email" ? "email" : "tel"}
             placeholder={
               recoveryMethod === "email"
-                ? "Enter your registered email"
-                : "Enter your registered phone number"
+                ? t("forgotPassword.emailPlaceholder")
+                : t("forgotPassword.phonePlaceholder")
             }
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
@@ -132,18 +136,18 @@ const ForgotPassword = () => {
             className="w-full text-sm sm:text-base py-2 sm:py-3"
             disabled={!identifier.trim() || isSubmitting}
           >
-            {isSubmitting ? "Sending reset link..." : "Reset Password"}
+            {isSubmitting ? t("forgotPassword.sending") : t("forgotPassword.reset")}
           </Button>
 
           <div className="rounded-lg border border-gray-800 p-3 space-y-3">
             <p className="text-sm text-gray-400">
-              Need a simple new password? Generate one with letters only.
+              {t("forgotPassword.simplePassword")}
             </p>
             <div className="flex gap-2">
               <Input
                 readOnly
                 value={generatedPassword}
-                placeholder="Generated password"
+                placeholder={t("forgotPassword.generatedPlaceholder")}
                 className="text-sm sm:text-base"
               />
               <Button
@@ -162,7 +166,7 @@ const ForgotPassword = () => {
               className="w-full bg-black text-sm sm:text-base"
               onClick={handleGeneratePassword}
             >
-              Generate Password <Lock />
+              {t("forgotPassword.generate")} <Lock />
             </Button>
           </div>
 
@@ -171,7 +175,7 @@ const ForgotPassword = () => {
             className="w-full bg-black text-sm sm:text-base"
             onClick={() => router.push("/")}
           >
-            ← Back to <Home />
+            {t("forgotPassword.back")} <Home />
           </Button>
         </CardContent>
       </Card>

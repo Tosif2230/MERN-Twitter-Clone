@@ -21,56 +21,65 @@ import {
   User,
 } from "lucide-react";
 import { useAuth } from "@/src/context/AuthContext";
+import { useTranslation } from "react-i18next";
+import LanguageSelector from "../language/LanguageSelector";
 
 const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
 
   const navigation = [
-    { name: "Home", icon: Home, current: currentPage === "home", page: "home" },
     {
-      name: "Explore",
+      name: t("sidebar.home"),
+      icon: Home,
+      current: currentPage === "home",
+      page: "home",
+    },
+    {
+      name: t("sidebar.explore"),
       icon: Search,
       current: currentPage === "explore",
       page: "explore",
     },
     {
-      name: "Notifications",
+      name: t("sidebar.notifications"),
       icon: Bell,
       current: currentPage === "notifications",
       page: "notifications",
       badge: true,
     },
     {
-      name: "Messages",
+      name: t("sidebar.messages"),
       icon: Mail,
       current: currentPage === "messages",
       page: "messages",
     },
     {
-      name: "Bookmarks",
+      name: t("sidebar.bookmarks"),
       icon: Bookmark,
       current: currentPage === "bookmarks",
       page: "bookmarks",
     },
     {
-      name: "Subscription",
+      name: t("sidebar.subscription"),
       icon: CreditCard,
       current: currentPage === "subscription",
       page: "subscription",
     },
     {
-      name: "Profile",
+      name: t("sidebar.profile"),
       icon: User,
       current: currentPage === "profile",
       page: "profile",
     },
     {
-      name: "More",
+      name: t("sidebar.more"),
       icon: MoreHorizontal,
       current: currentPage === "more",
       page: "more",
     },
   ];
+
   return (
     <div className="flex flex-col h-screen w-20 lg:w-64 bg-black sticky top-0 px-2">
       <div className="p-4">
@@ -79,7 +88,7 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
       <nav className="flex-1 px-2">
         <ul className="space-y-2">
           {navigation.map((item) => (
-            <li key={item.name}>
+            <li key={item.page}>
               <Button
                 variant="ghost"
                 className={`w-full justify-center lg:justify-start text-xl py-4 lg:py-6 px-2 lg:px-4 rounded-full hover:bg-stone-900 ${
@@ -100,7 +109,7 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
         </ul>
         <div className="mt-4 px-2 py-2">
           <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-full text-lg">
-            Post
+            {t("sidebar.post")}
           </Button>
         </div>
       </nav>
@@ -125,18 +134,21 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
                 <MoreHorizontal className="h-5 w-5 text-gray-400" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 bg-black border-gray-800">
+            <DropdownMenuContent className="w-56 border-gray-800 bg-black">
               <DropdownMenuItem className="text-white hover:bg-gray-900">
                 <Settings className="mr-2 h-4 w-4" />
-                Settings
+                {t("sidebar.settings")}
               </DropdownMenuItem>
+              <LanguageSelector
+                type="dropdownMenu"
+              />
               <DropdownMenuSeparator className="bg-gray-800" />
               <DropdownMenuItem
                 className="text-white hover:bg-gray-900"
                 onClick={logout}
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                Log out @{user.userName}
+                {t("sidebar.logout", { username: user.userName })}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -145,4 +157,5 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
     </div>
   );
 };
+
 export default Sidebar;

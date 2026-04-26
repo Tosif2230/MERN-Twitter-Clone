@@ -13,6 +13,7 @@ import TwitterLogo from "./TwitterLogo";
 import LoadingSpinner from "./Loading-spinner";
 import { Separator } from "./ui/separator";
 import { useAuth } from "../context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 type AuthMode = "login" | "signup";
 
@@ -28,6 +29,7 @@ const AuthModal = ({
   initialMode = "login",
 }: AuthModalProps) => {
   const { login, signup, isLoading } = useAuth();
+  const { t } = useTranslation();
 
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
@@ -66,35 +68,34 @@ const AuthModal = ({
     const newErrors: Record<string, string> = {};
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
+      newErrors.email = t("auth.emailRequired");
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email";
+      newErrors.email = t("auth.emailInvalid");
     }
 
     if (!formData.password.trim()) {
-      newErrors.password = "Password is required";
+      newErrors.password = t("auth.passwordRequired");
     } else if (formData.password.length < 6) {
-      newErrors.password = "password must be at least 6 characters";
+      newErrors.password = t("auth.passwordShort");
     }
 
     if (mode === "signup") {
       if (!formData.phone.trim()) {
-        newErrors.phone = "Phone number is required";
+        newErrors.phone = t("auth.phoneRequired");
       } else if (!/^[+0-9\s()-]{7,20}$/.test(formData.phone)) {
-        newErrors.phone = "Please enter a valid phone number";
+        newErrors.phone = t("auth.phoneInvalid");
       }
 
       if (!formData.userName.trim()) {
-        newErrors.userName = "Username is required";
+        newErrors.userName = t("auth.usernameRequired");
       } else if (formData.userName.length < 3) {
-        newErrors.userName = "Username must be at least 3 characters";
+        newErrors.userName = t("auth.usernameShort");
       } else if (!/^[a-zA-Z0-9_]+$/.test(formData.userName)) {
-        newErrors.userName =
-          "Username can only contain letters, number and underscores";
+        newErrors.userName = t("auth.usernameInvalid");
       }
 
       if (!formData.displayName.trim()) {
-        newErrors.displayName = "Display name is required";
+        newErrors.displayName = t("auth.displayNameRequired");
       }
     }
 
@@ -164,7 +165,9 @@ const AuthModal = ({
               <TwitterLogo size="xl" className="text-white" />
             </div>
             <CardTitle className="text-2xl font-bold">
-              {mode === "login" ? "Sign in to X" : "Create your account"}
+              {mode === "login"
+                ? t("auth.signInTitle")
+                : t("auth.createTitle")}
             </CardTitle>
           </div>
         </CardHeader>
@@ -179,7 +182,7 @@ const AuthModal = ({
               <>
                 <div className="space-y-2">
                   <Label htmlFor="displayName" className="text-white">
-                    Display Name
+                    {t("auth.displayName")}
                   </Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -187,7 +190,7 @@ const AuthModal = ({
                       id="displayName"
                       type="text"
                       value={formData.displayName}
-                      placeholder="Display Name"
+                      placeholder={t("auth.displayNamePlaceholder")}
                       onChange={(e) =>
                         handleInputChange("displayName", e.target.value)
                       }
@@ -201,7 +204,7 @@ const AuthModal = ({
 
                 <div className="space-y-2">
                   <Label htmlFor="username" className="text-white">
-                    User Name
+                    {t("auth.username")}
                   </Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
@@ -210,7 +213,7 @@ const AuthModal = ({
                     <Input
                       id="username"
                       type="text"
-                      placeholder="username"
+                      placeholder={t("auth.usernamePlaceholder")}
                       value={formData.userName}
                       onChange={(e) =>
                         handleInputChange("userName", e.target.value)
@@ -226,14 +229,14 @@ const AuthModal = ({
             )}
             <div className="space-y-2">
               <Label htmlFor="email" className="text-white">
-                Email
+                {t("auth.email")}
               </Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder={t("auth.emailPlaceholder")}
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   className="pl-10 bg-transparent border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
@@ -247,14 +250,14 @@ const AuthModal = ({
             {mode === "signup" && (
               <div className="space-y-2">
                 <Label htmlFor="phone" className="text-white">
-                  Phone Number
+                  {t("auth.phone")}
                 </Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <Input
                     id="phone"
                     type="tel"
-                    placeholder="Enter your phone number"
+                    placeholder={t("auth.phonePlaceholder")}
                     value={formData.phone}
                     onChange={(e) =>
                       handleInputChange("phone", e.target.value)
@@ -270,14 +273,14 @@ const AuthModal = ({
 
             <div className="space-y-2">
               <Label htmlFor="password" className="text-white">
-                Password
+                {t("auth.password")}
               </Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
+                  placeholder={t("auth.passwordPlaceholder")}
                   value={formData.password}
                   onChange={(e) =>
                     handleInputChange("password", e.target.value)
@@ -313,34 +316,36 @@ const AuthModal = ({
                 <div className="flex items-center space-x-2">
                   <LoadingSpinner size="sm" />
                   <span>
-                    {mode === "login" ? "Signing in..." : "Creating account..."}
+                    {mode === "login"
+                      ? t("auth.signingIn")
+                      : t("auth.creatingAccount")}
                   </span>
                 </div>
               ) : mode === "login" ? (
-                "Sign in"
+                t("auth.signIn")
               ) : (
-                "Create account"
+                t("auth.createAccount")
               )}
             </Button>
           </form>
           <div className="relative">
             <Separator className="bg-gray-700" />
             <span className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black px-2 text-gray-400 text-sm">
-              OR
+              {t("auth.or")}
             </span>
           </div>
           <div>
             <p>
               {mode === "login"
-                ? "Don't have an account"
-                : "Already have an account?"}
+                ? t("auth.noAccount")
+                : t("auth.haveAccount")}
               <Button
                 variant="link"
                 onClick={switchMode}
                 disabled={isLoading}
                 className="text-blue-400 hover:text-blue-300 font-semibold pl-1"
               >
-                {mode === "login" ? "Sign up" : "Log in"}
+                {mode === "login" ? t("auth.signUp") : t("landing.login")}
               </Button>
             </p>
             {mode === "login" ? (
@@ -351,7 +356,7 @@ const AuthModal = ({
                   router.push("/forgot-password");
                 }}
               >
-                Forgot Password?
+                {t("auth.forgotPassword")}
               </p>
             ) : (
               ""
@@ -359,8 +364,7 @@ const AuthModal = ({
           </div>
           {mode === "signup" && (
             <div className="text-center text-xs text-gray-400">
-              By signing up, you agree to our Terms of Service and Privacy
-              Policy, including Cookie Use.
+              {t("auth.signupTerms")}
             </div>
           )}
         </CardContent>

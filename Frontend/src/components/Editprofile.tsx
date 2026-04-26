@@ -10,39 +10,42 @@ import { Textarea } from "./ui/textarea";
 import axios from "axios";
 import LoadingSpinner from "./Loading-spinner";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const Editprofile = ({ isOpen, onClose }: any) => {
   const { user, updateProfile } = useAuth();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     displayName: user?.displayName || "",
     bio: user?.bio || "",
-    location: user?.location || "Earth",
-    website: user?.website || "example.com",
+    location: user?.location || t("profile.defaultLocation"),
+    website: user?.website || t("profile.defaultWebsite"),
     avatar: user?.avatar || "",
   });
   const [error, setError] = useState<any>({});
 
   if (!isOpen || !user) return null;
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.displayName.trim()) {
-      newErrors.displayName = "Display name is required";
+      newErrors.displayName = t("editProfile.displayNameRequired");
     } else if (formData.displayName.length > 50) {
-      newErrors.displayName = "Display name must be 50 characters or less";
+      newErrors.displayName = t("editProfile.displayNameLong");
     }
 
     if (formData.bio.length > 160) {
-      newErrors.bio = "Bio must me 160 characters or less";
+      newErrors.bio = t("editProfile.bioLong");
     }
 
     if (formData.website && formData.website.length > 100) {
-      newErrors.website = "Website must be 100 characters or less";
+      newErrors.website = t("editProfile.websiteLong");
     }
 
     if (formData.location && formData.location.length > 30) {
-      newErrors.location = "Location must be 30 characters or less";
+      newErrors.location = t("editProfile.locationLong");
     }
 
     setError(newErrors);
@@ -56,10 +59,10 @@ const Editprofile = ({ isOpen, onClose }: any) => {
     setIsLoading(true);
     try {
       await updateProfile(formData);
-      toast.success("Profile updated successfully");
+      toast.success(t("editProfile.profileUpdated"));
       onClose();
-    } catch (error) {
-      toast.error("Failed to update profile");
+    } catch {
+      toast.error(t("editProfile.profileFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +93,7 @@ const Editprofile = ({ isOpen, onClose }: any) => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Image upload failed");
+      toast.error(t("editProfile.imageFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -111,7 +114,7 @@ const Editprofile = ({ isOpen, onClose }: any) => {
               >
                 <X className="h-5 w-5" />
               </Button>
-              <CardTitle>Edit profile</CardTitle>
+              <CardTitle>{t("editProfile.title")}</CardTitle>
             </div>
             <Button
               type="submit"
@@ -122,10 +125,10 @@ const Editprofile = ({ isOpen, onClose }: any) => {
               {isLoading ? (
                 <div className="flex items-center space-x-2">
                   <LoadingSpinner size="sm" />
-                  <span>Saving...</span>
+                  <span>{t("editProfile.saving")}</span>
                 </div>
               ) : (
-                "Save"
+                t("editProfile.save")
               )}
             </Button>
           </div>
@@ -190,7 +193,7 @@ const Editprofile = ({ isOpen, onClose }: any) => {
               {/* Display Name */}
               <div className="space-y-2">
                 <Label htmlFor="displayName" className="text-white">
-                  Name
+                  {t("editProfile.name")}
                 </Label>
                 <Input
                   id="displayName"
@@ -200,7 +203,7 @@ const Editprofile = ({ isOpen, onClose }: any) => {
                     handleInputChange("displayName", e.target.value)
                   }
                   className="bg-transparent border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
-                  placeholder="Your Display Name"
+                 placeholder={t("editProfile.namePlaceholder")}
                   maxLength={50}
                   disabled={isLoading}
                 />
@@ -216,14 +219,14 @@ const Editprofile = ({ isOpen, onClose }: any) => {
               {/* Bio */}
               <div className="space-y-2">
                 <Label htmlFor="bio" className="text-white">
-                  Bio
+                  {t("editProfile.bio")}
                 </Label>
                 <Textarea
                   id="bio"
                   value={formData.bio}
                   onChange={(e) => handleInputChange("bio", e.target.value)}
                   className="bg-transparent border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 resize-none min-h-[100px]"
-                  placeholder="Enter your bio.."
+                   placeholder={t("editProfile.bioPlaceholder")}
                   maxLength={160}
                   disabled={isLoading}
                 />
@@ -235,7 +238,7 @@ const Editprofile = ({ isOpen, onClose }: any) => {
               {/* Location */}
               <div className="space-y-2">
                 <Label htmlFor="location" className="text-white">
-                  Location
+                  {t("editProfile.location")}
                 </Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -246,7 +249,7 @@ const Editprofile = ({ isOpen, onClose }: any) => {
                     onChange={(e) =>
                       handleInputChange("location", e.target.value)
                     }
-                    placeholder="Where are you located?"
+                    placeholder={t("editProfile.locationPlaceholder")}
                     maxLength={30}
                     className="pl-10 bg-transparent border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
                     disabled={isLoading}
@@ -264,7 +267,7 @@ const Editprofile = ({ isOpen, onClose }: any) => {
               {/* Website */}
               <div className="space-y-2">
                 <Label htmlFor="website" className="text-white">
-                  Website
+                  {t("editProfile.website")}
                 </Label>
                 <div className="relative">
                   <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -276,7 +279,7 @@ const Editprofile = ({ isOpen, onClose }: any) => {
                       handleInputChange("website", e.target.value)
                     }
                     className="pl-10 bg-transparent border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
-                    placeholder="Your website url"
+                    placeholder={t("editProfile.websitePlaceholder")}
                     maxLength={100}
                     disabled={isLoading}
                   />
@@ -297,4 +300,5 @@ const Editprofile = ({ isOpen, onClose }: any) => {
     </div>
   );
 };
+
 export default Editprofile;

@@ -6,6 +6,7 @@ import { Input } from "../ui/input";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { useTranslation } from "react-i18next";
 
 const suggestions = [
   {
@@ -35,13 +36,15 @@ const suggestions = [
 ];
 
 export default function RightSidebar() {
+  const { t } = useTranslation();
+
   return (
     <div className="w-full max-w-xs space-y-4 sticky top-0">
       {/* Search */}
       <div className="sticky top-2 z-50 w-full space-y-4 bg-black">
         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
         <Input
-          placeholder="Search"
+          placeholder={t("rightSidebar.search")}
           className="pl-12 bg-black border-gray-800 text-white placeholder-gray-400 rounded-full py-5"
         />
       </div>
@@ -49,21 +52,20 @@ export default function RightSidebar() {
       <Card className="bg-black border-gray-800">
         <CardContent className="p-4 ">
           <h3 className="text-white text-xl font-bold mb-2">
-            Subscribe to Premium
+            {t("rightSidebar.premiumTitle")}
           </h3>
-          <p className="text-gray-400 text-sm mb-4">
-            Subscribe to unlock new features and if eligible, receive a share of
-            revenue.
+          <p className="mb-4 text-sm text-gray-400">
+            {t("rightSidebar.premiumText")}
           </p>
-          <Button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-full">
-            Subscribe
+          <Button className="rounded-full bg-blue-500 font-semibold text-white hover:bg-blue-600 text-white font-semibold rounded-full">
+            {t("rightSidebar.subscribe")}
           </Button>
         </CardContent>
       </Card>
       {/* Who to follow */}
       <Card className="bg-black border-gray-800">
         <CardContent className="p-4">
-          <h3 className="text-white text-xl font-bold mb-4">You might like</h3>
+          <h3 className="mb-4 text-xl font-bold mb-4 text-white">{t("rightSidebar.likeTitle")}</h3>
           <div className="space-y-4">
             {suggestions.map((user) => (
               <div
@@ -100,7 +102,7 @@ export default function RightSidebar() {
                   variant="outline"
                   className="bg-white text-black hover:bg-gray-200 font-semibold rounded-full px-4"
                 >
-                  Follow
+                  {t("rightSidebar.follow")}
                 </Button>
               </div>
             ))}
@@ -109,7 +111,7 @@ export default function RightSidebar() {
             variant="ghost"
             className="text-blue-400 hover:text-blue-300 p-0 mt-4 hover:bg-transparent "
           >
-            Show more
+            {t("rightSidebar.showMore")}
           </Button>
         </CardContent>
       </Card>
@@ -117,19 +119,19 @@ export default function RightSidebar() {
       <div className="p-4 text-xs text-gray-500 space-y-2">
         <div className="flex flex-wrap gap-x-3 gap-y-1">
           <a href="#" className="hover:underline">
-            Terms of Service
+            {t("rightSidebar.terms")}
           </a>
           <a href="#" className="hover:underline">
-            Privacy Policy
+            {t("rightSidebar.privacy")}
           </a>
           <a href="#" className="hover:underline">
-            Cookie Policy
+            {t("rightSidebar.cookie")}
           </a>
           <a href="#" className="hover:underline">
-            Accessibility
+            {t("rightSidebar.accessibility")}
           </a>
           <a href="#" className="hover:underline">
-            Ads info
+            {t("rightSidebar.ads")}
           </a>
         </div>
         <div>© 2026 X Corp.</div>

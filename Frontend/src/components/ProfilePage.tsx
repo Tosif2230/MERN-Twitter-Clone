@@ -23,6 +23,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { useTranslation } from "react-i18next";
 
 interface Tweet {
   _id: string;
@@ -104,12 +105,13 @@ const tweets: Tweet[] = [
   },
 ];
 const ProfilePage = () => {
-  const { user } = useAuth();
+  const { user, notificationsEnabled, setNotificationsEnabled } = useAuth();
+  const { i18n, t } = useTranslation();
   const [activeTab, setActiveTab] = useState("posts");
   const [showEditModal, setShowEditModal] = useState(false);
   const [tweets, setTweets] = useState<any>([]);
-  const { notificationsEnabled, setNotificationsEnabled } = useAuth();
   const [loading, setLoading] = useState(false);
+
   const fetchTweets = async () => {
     try {
       setLoading(true);
@@ -128,9 +130,9 @@ const ProfilePage = () => {
 
   if (!user) return null;
 
-  const userTweets = tweets.filter(
-    (tweet: any) => tweet?.author?._id === user._id,
-  );
+  const locale = i18n.resolvedLanguage || "en";
+  const userTweets = tweets.filter((tweet: any) => tweet?.author?._id === user._id);
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -144,10 +146,10 @@ const ProfilePage = () => {
             <ArrowLeft className="h-5 w-5 text-white" />
           </Button>
           <div>
-            <h1 className="text-xl font-bold text-white">
-              {user?.displayName}
-            </h1>
-            <p className="text-sm text-gray-400">{userTweets.length} posts</p>
+            <h1 className="text-xl font-bold text-white">{user?.displayName}</h1>
+            <p className="text-sm text-gray-400">
+              {t("profile.postsCount", { count: userTweets.length })}
+            </p>
           </div>
         </div>
         <div className="ml-auto">
@@ -156,7 +158,7 @@ const ProfilePage = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="m-4 p-2 rounded-full hover:bg-gray-900"
+                className="m-4 rounded-full p-2 hover:bg-gray-900"
               >
                 <Settings className="text-white h-5 w-5" />
               </Button>
@@ -166,7 +168,7 @@ const ProfilePage = () => {
               align="end"
               className="w-56 bg-black border border-gray-800 rounded-xl shadow-lg p-2"
             >
-              <DropdownMenuItem className="text-white hover:bg-gray-900 rounded-md cursor-pointer"></DropdownMenuItem>
+              <DropdownMenuItem className="text-white hover:bg-gray-900 rounded-md cursor-pointer"> {t("sidebar.settings")}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -206,7 +208,7 @@ const ProfilePage = () => {
             className="border-gray-600 bg-transparent text-white font-semibold rounded-full px-6 hover:bg-stone-800 hover:text-white"
             onClick={() => setShowEditModal(true)}
           >
-            Edit profile
+            {t("profile.editProfile")}
           </Button>
         </div>
       </div>
@@ -226,20 +228,20 @@ const ProfilePage = () => {
         <div className="flex items-center space-x-4 text-gray-400 text-sm mb-3">
           <div className="flex items-center space-x-1">
             <MapPin className="h-4 w-4" />
-            <span>{user.location ? user.location : "Earth"}</span>
+            <span>{user.location || t("profile.defaultLocation")}</span>
           </div>
           <div className="flex items-center space-x-1">
             <LinkIcon className="h-4 w-4" />
             <span className="text-blue-400">
-              {user.website ? user.website : "example.com"}
+              {user.website || t("profile.defaultWebsite")}
             </span>
           </div>
           <div className="flex items-center space-x-1">
             <Calendar className="h-4 w-4" />
             <span>
-              Joined{" "}
+              {t("profile.joined")}{" "}
               {user.joinedDate &&
-                new Date(user.joinedDate).toLocaleDateString("en-us", {
+                new Date(user.joinedDate).toLocaleDateString(locale, {
                   month: "long",
                   year: "numeric",
                 })}
@@ -249,10 +251,10 @@ const ProfilePage = () => {
         <div className="flex justify-between items-center">
           <div className="flex gap-3">
             <span className="text-sm text-gray-400 cursor-pointer hover:border-b hover:border-white  ">
-              0 Following
+              {t("profile.following", { count: 0 })}
             </span>
             <span className="text-sm text-gray-400 cursor-pointer hover:border-b hover:border-white  ">
-              0 Followers
+               {t("profile.followers", { count: 0 })}
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -278,38 +280,38 @@ const ProfilePage = () => {
             value="posts"
             className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
           >
-            Posts
+            {t("profile.posts")}
           </TabsTrigger>
           <TabsTrigger
             value="replies"
             className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
           >
-            Replies
+            {t("profile.replies")}
           </TabsTrigger>
           <TabsTrigger
             value="highlights"
             className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
           >
-            Highlights
+            {t("profile.highlights")}
           </TabsTrigger>
           <TabsTrigger
             value="articles"
             className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
           >
-            Articles
+            {t("profile.articles")}
           </TabsTrigger>
           <TabsTrigger
             value="media"
             className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
           >
-            Media
+            {t("profile.media")}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="posts">
           <div>
-            {loading ? (
-              <div className="text-center text-gray-500 py-10">
-                No posts yet
+            {loading || userTweets.length === 0 ? (
+              <div className="py-10 text-center text-gray-500">
+                {t("profile.noPosts")}
               </div>
             ) : (
               userTweets.map((tweet: any) => (

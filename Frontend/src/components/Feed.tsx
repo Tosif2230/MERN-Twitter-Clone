@@ -8,6 +8,7 @@ import axiosInstance from "../lib/axiosInstance.js";
 import { db } from "../context/FireBase";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 interface Tweet {
   _id: string;
@@ -94,6 +95,7 @@ const Feed = () => {
   const [loading, setLoading] = useState(false);
   const { notificationsEnabled } = useAuth();
   const isInitialLoad = useRef(true);
+  const { t } = useTranslation();
 
   const fetchTweets = async () => {
     try {
@@ -156,13 +158,13 @@ const Feed = () => {
               value="foryou"
               className="data-[state=active]:bg-transparent  data-[state=active]:text-white data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-3 sm:py-4 text-sm sm:text-base font-semibold"
             >
-              For you
+              {t("feed.forYou")}
             </TabsTrigger>
             <TabsTrigger
               value="following"
               className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-3 sm:py-4 text-sm sm:text-base font-semibold"
             >
-              Following
+              {t("feed.following")}
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -174,14 +176,12 @@ const Feed = () => {
             <CardContent className="py-12 text-center">
               <div className="text-gray-400 mb-4">
                 <LoadingSpinner size="lg" className="mx-auto mb-4" />
-                <p>Loading tweets..</p>
+                <p>{t("feed.loadingTweets")}</p>
               </div>
             </CardContent>
           </Card>
         ) : (
-          tweets.map((tweet: any) => (
-            <TweetCard key={tweet._id} tweet={tweet} />
-          ))
+          tweets.map((tweet: any) => <TweetCard key={tweet._id} tweet={tweet} />)
         )}
       </div>
     </div>

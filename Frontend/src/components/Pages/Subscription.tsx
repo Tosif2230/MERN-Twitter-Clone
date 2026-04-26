@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Check,
   Clock,
@@ -14,6 +14,7 @@ import { useAuth } from "../../context/AuthContext";
 import axiosInstance from "../../lib/axiosInstance";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
+import { useTranslation } from "react-i18next";
 
 declare global {
   interface Window {
@@ -39,44 +40,43 @@ type StatusType = {
   subscriptionExpiresAt?: string;
 };
 
-const tweetPlans: PlanType[] = [
-  {
-    name: "Free",
-    price: 0,
-    tweets: "1 tweet",
-    description: "Best for trying the platform.",
-    buttonText: "Free",
-  },
-  {
-    name: "Bronze",
-    price: 100,
-    tweets: "3 tweets",
-    description: "A small upgrade for light posting.",
-    buttonText: "Pay with Razorpay",
-  },
-  {
-    name: "Silver",
-    price: 300,
-    tweets: "5 tweets",
-    description: "A simple plan for regular updates.",
-    buttonText: "Pay with Razorpay",
-  },
-  {
-    name: "Gold",
-    price: 1000,
-    tweets: "Unlimited tweets",
-    description: "Post without any tweet limit.",
-    buttonText: "Pay with Razorpay",
-  },
-];
-
 const Subscription = () => {
   const { user, refreshUser } = useAuth();
+  const { i18n, t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState("Free");
-  const [message, setMessage] = useState("");
-  const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<StatusType | null>(null);
+
+  const tweetPlans: PlanType[] = [
+    {
+      name: "Free",
+      price: 0,
+      tweets: t("subscription.oneTweet"),
+      description: t("subscription.freeDescription"),
+      buttonText: t("subscription.freeButton"),
+    },
+    {
+      name: "Bronze",
+      price: 100,
+      tweets: t("subscription.threeTweets"),
+      description: t("subscription.bronzeDescription"),
+      buttonText: t("subscription.payButton"),
+    },
+    {
+      name: "Silver",
+      price: 300,
+      tweets: t("subscription.fiveTweets"),
+      description: t("subscription.silverDescription"),
+      buttonText: t("subscription.payButton"),
+    },
+    {
+      name: "Gold",
+      price: 1000,
+      tweets: t("subscription.unlimitedTweets"),
+      description: t("subscription.goldDescription"),
+      buttonText: t("subscription.payButton"),
+    },
+  ];
 
   const hasActivePaidPlan =
     !!status &&
@@ -84,37 +84,21 @@ const Subscription = () => {
     !!status.subscriptionExpiresAt &&
     new Date(status.subscriptionExpiresAt) > new Date();
 
-  const fetchSubscriptionStatus = async () => {
+  const fetchSubscriptionStatus = useCallback(async () => {
     if (!user?._id) return;
 
     try {
-      const res = await axiosInstance.get(
-        `/api/subscription/status/${user._id}`,
-      );
+      const res = await axiosInstance.get(`/api/subscription/status/${user._id}`);
       setStatus(res.data);
       setSelectedPlan(res.data.currentPlan || "Free");
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [user?._id]);
 
   useEffect(() => {
-    const loadStatus = async () => {
-      if (!user?._id) return;
-
-      try {
-        const res = await axiosInstance.get(
-          `/api/subscription/status/${user._id}`,
-        );
-        setStatus(res.data);
-        setSelectedPlan(res.data.currentPlan || "Free");
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    loadStatus();
-  }, [user?._id]);
+    fetchSubscriptionStatus();
+  }, [fetchSubscriptionStatus]);
 
   useEffect(() => {
     if (window.Razorpay) return;
@@ -147,25 +131,23 @@ const Subscription = () => {
     await refreshUser();
     await fetchSubscriptionStatus();
 
-    setSuccess(true);
-    setMessage(
+    toast.success(t("subscription.toastActivated", { plan: planName }));
+    return (
       emailSentMessage ||
-        (res.data.emailSent
-          ? `${planName} plan activated. Invoice details were sent to your email.`
-          : `${planName} plan activated successfully.`),
+      (res.data.emailSent
+        ? t("subscription.activatedEmail", { plan: planName })
+        : t("subscription.activated", { plan: planName }))
     );
-    toast.success(`${planName} plan activated`);
   };
 
   const handlePayment = async (plan: PlanType) => {
     if (!user?._id) {
-      toast.error("Please login first");
+      toast.error(t("subscription.loginFirst"));
       return;
     }
 
     setSelectedPlan(plan.name);
     setIsLoading(true);
-    setMessage("");
 
     try {
       if (plan.name === "Free") {
@@ -179,13 +161,14 @@ const Subscription = () => {
       });
 
       if (orderRes.data.demoMode || !window.Razorpay) {
-        await finishSubscription(
+        const demoMessage = await finishSubscription(
           plan.name,
           `demo_payment_${Date.now()}`,
           orderRes.data.order.id,
           `demo_signature_${Date.now()}`,
-          `${plan.name} plan activated in demo mode. Email will work after MAIL_USER and MAIL_PASS are added.`,
+          t("subscription.demoActivated", { plan: plan.name }),
         );
+        toast.success(demoMessage);
         return;
       }
 
@@ -197,12 +180,13 @@ const Subscription = () => {
         description: `${plan.name} monthly subscription`,
         order_id: orderRes.data.order.id,
         handler: async (response: any) => {
-          await finishSubscription(
+          const message = await finishSubscription(
             plan.name,
             response.razorpay_payment_id,
             response.razorpay_order_id,
             response.razorpay_signature,
           );
+          toast.success(message);
         },
         prefill: {
           name: user.displayName,
@@ -218,25 +202,25 @@ const Subscription = () => {
     } catch (error: any) {
       console.log("FULL ERROR:", error);
       console.log("BACKEND ERROR:", error.response?.data);
-
-      const errorMessage =
-        error.response?.data?.message || "Payment could not be completed";
-      toast.error(errorMessage);
+      toast.error(error.response?.data?.message || t("subscription.paymentError"));
     } finally {
       setIsLoading(false);
     }
   };
 
   const paymentOpen = status?.paymentWindowOpen ?? false;
+  const locale = i18n.resolvedLanguage || "en";
 
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="sticky top-0 z-10 border-b border-gray-800 bg-black px-3 py-4 sm:px-5">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-lg font-bold sm:text-xl">Subscription</h1>
+            <h1 className="text-lg font-bold sm:text-xl">
+              {t("subscription.title")}
+            </h1>
             <p className="text-sm text-gray-400">
-              Choose a plan to manage your tweet limit.
+              {t("subscription.subtitle")}
             </p>
           </div>
           <CreditCard className="h-6 w-6 shrink-0 text-blue-400" />
@@ -246,28 +230,28 @@ const Subscription = () => {
       <div className="border-b border-gray-800 px-3 py-4 sm:px-5 sm:py-5">
         <div className="mx-auto max-w-5xl space-y-3">
           {status && (
-            <div className="flex justify-between rounded-lg border border-gray-800 bg-gray-950 p-4 text-sm text-gray-300">
+            <div className="flex flex-col gap-2 rounded-lg border border-gray-800 bg-gray-950 p-4 text-sm text-gray-300 md:flex-row md:justify-between">
               <p>
-                Current plan:
+                {t("subscription.currentPlan")}
                 <span className="font-semibold text-white">
                   {status.currentPlan}
                 </span>
               </p>
               <p>
-                Tweet usage:
+                {t("subscription.tweetUsage")}
                 <span className="font-semibold text-white">
-                  {status.usedTweets} used
+                  {t("subscription.used", { count: status.usedTweets })}
                   {status.tweetLimit === "Unlimited"
-                    ? " / Unlimited"
+                    ? ` / ${t("subscription.unlimited")}`
                     : ` / ${status.tweetLimit}`}
                 </span>
               </p>
               {status.subscriptionExpiresAt && (
                 <p>
-                  Expires on:{" "}
+                  {t("subscription.expiresOn")}
                   <span className="font-semibold text-white">
                     {new Date(status.subscriptionExpiresAt).toLocaleDateString(
-                      "en-IN",
+                      locale,
                       {
                         day: "numeric",
                         month: "short",
@@ -288,7 +272,7 @@ const Subscription = () => {
               )}
               <div>
                 <h2 className="text-sm font-semibold leading-6 sm:text-base">
-                  Payments are allowed only from 10:00 AM to 11:00 AM IST.
+                  {t("subscription.paymentTime")}
                 </h2>
               </div>
             </div>
@@ -311,7 +295,7 @@ const Subscription = () => {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-lg font-bold text-white">
-                    {plan.name}
+                    {t(`subscription.${plan.name.toLowerCase()}`)}
                   </div>
                   <p className="text-sm text-gray-400">{plan.description}</p>
                 </div>
@@ -331,21 +315,21 @@ const Subscription = () => {
 
               <div className="mt-5">
                 <span className="text-2xl font-bold text-white sm:text-3xl">
-                  Rs. {plan.price}
+                  {t("subscription.currency", { price: plan.price })}
                 </span>
                 <span className="ml-1 whitespace-nowrap text-sm text-gray-400">
-                  / month
+                  {t("subscription.month")}
                 </span>
               </div>
 
               <div className="mt-4 flex items-start gap-2 text-sm text-gray-200">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-green-400" />
-                <span>{plan.tweets} allowed</span>
+                <span>{plan.tweets}</span>
               </div>
 
               <div className="mt-2 flex items-start gap-2 text-sm text-gray-200">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-green-400" />
-                <span>Invoice email after successful payment</span>
+                <span>{t("subscription.invoiceAfterPayment")}</span>
               </div>
 
               <Button
@@ -365,9 +349,9 @@ const Subscription = () => {
                 }
               >
                 {isLoading && selectedPlan === plan.name
-                  ? "Please wait..."
+                  ? t("subscription.pleaseWait")
                   : plan.name === "Free" && hasActivePaidPlan
-                    ? "Active Paid Plan"
+                    ? t("subscription.activePaidPlan")
                     : plan.buttonText}
               </Button>
             </CardContent>

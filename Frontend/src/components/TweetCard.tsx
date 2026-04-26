@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Image from "next/image";
 import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
@@ -21,11 +22,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { useTranslation } from "react-i18next";
 
 const TweetCard = ({ tweet }: any) => {
   const { user } = useAuth();
+  const { i18n, t } = useTranslation();
   const [tweetState, settweetState] = useState(tweet);
   const [deleted, setDeleted] = useState(false);
+
   const liketweet = async (tweetid: string) => {
     try {
       const res = await axiosInstance.post(`/api/like/${tweetid}`, {
@@ -36,7 +40,9 @@ const TweetCard = ({ tweet }: any) => {
       console.log(error);
     }
   };
+
   if (deleted) return null;
+
   const deleteTweet = async (tweetid: string) => {
     try {
       await axiosInstance.delete(`/api/delete/${tweetid}`, {
@@ -58,18 +64,21 @@ const TweetCard = ({ tweet }: any) => {
       console.log(error);
     }
   };
+
   const formatNumber = (num: number) => {
     if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + "M";
+      return `${(num / 1000000).toFixed(1)}M`;
     }
     if (num >= 1000) {
-      return (num / 1000).toFixed(1) + "K";
+      return `${(num / 1000).toFixed(1)}K`;
     }
     return num.toString();
   };
 
   const isLiked = tweetState.likedBy?.includes(user?._id);
   const isRetweet = tweetState.retweetedBy?.includes(user?._id);
+  const locale = i18n.resolvedLanguage || "en";
+
   return (
     <Card className="bg-black border-gray-800 border-x-0 border-t-0 rounded-none hover:bg-gray-950/50 transition-colors cursor-pointer">
       <CardContent className="p-4">
@@ -90,7 +99,7 @@ const TweetCard = ({ tweet }: any) => {
                 {tweetState?.author?.displayName}
               </span>
               {tweetState?.author?.verified && (
-                <div className="bg-blue-500 rounded-full p-0.5">
+             <div className="bg-blue-500 rounded-full p-0.5">
                   <svg
                     className="h-4 w-4 text-white fill-current"
                     viewBox="0 0 20 20"
@@ -99,7 +108,7 @@ const TweetCard = ({ tweet }: any) => {
                   </svg>
                 </div>
               )}
-              <span className="text-gray-500 text-sm truncate max-w-[120px] sm:max-w-none">
+           <span className="text-gray-500 text-sm truncate max-w-[120px] sm:max-w-none">
                 @{tweetState?.author?.userName}
               </span>
               <span className="text-gray-500 text-sm truncate max-w-[120px] sm:max-w-none">
@@ -108,17 +117,17 @@ const TweetCard = ({ tweet }: any) => {
               <div className="flex items-center gap-2">
                 <span className="text-gray-500 text-sm sm:hidden">
                   {tweetState.timestamp &&
-                    new Date(tweetState.timestamp).toLocaleTimeString("en-us", {
+                    new Date(tweetState.timestamp).toLocaleTimeString(locale, {
                       hour: "numeric",
                       minute: "2-digit",
                       hour12: true,
                     })}
                 </span>
                 <span
-                  className="text-gray-500 text-sm hidden sm:block"
+                  className="hidden text-sm text-gray-500 sm:block"
                   title={
                     tweetState.timestamp &&
-                    new Date(tweetState.timestamp).toLocaleString("en-us", {
+                    new Date(tweetState.timestamp).toLocaleString(locale, {
                       day: "numeric",
                       month: "long",
                       year: "numeric",
@@ -129,7 +138,7 @@ const TweetCard = ({ tweet }: any) => {
                   }
                 >
                   {tweetState.timestamp &&
-                    new Date(tweetState.timestamp).toLocaleDateString("en-us", {
+                    new Date(tweetState.timestamp).toLocaleDateString(locale, {
                       month: "long",
                       year: "numeric",
                     })}
@@ -161,18 +170,18 @@ const TweetCard = ({ tweet }: any) => {
                         className="text-white hover:bg-gray-900 rounded-md cursor-pointer"
                       >
                         <Trash2Icon className="text-red-500" />
-                        Delete
+                        {t("tweetCard.delete")}
                       </DropdownMenuItem>
                     )}
 
                     <DropdownMenuItem className="text-white hover:bg-gray-900 rounded-md cursor-pointer">
                       <Pin className="text-white" />
-                      Pin to your profile
+                      {t("tweetCard.pin")}
                     </DropdownMenuItem>
 
                     <DropdownMenuItem className="text-white hover:bg-gray-900 rounded-md cursor-pointer">
                       <ChartBar className="hover:text-black" />
-                      View post activity
+                      {t("tweetCard.activity")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -185,7 +194,7 @@ const TweetCard = ({ tweet }: any) => {
               <div className="mb-3 rounded-2xl overflow-hidden">
                 <img
                   src={tweetState.image}
-                  alt="Tweet image"
+                  alt={t("tweetCard.imageAlt")}
                   className="w-full h-auto max-h-80 sm:max-h-96 object-cover"
                 />
               </div>
@@ -193,7 +202,7 @@ const TweetCard = ({ tweet }: any) => {
             {tweetState.audio && (
               <audio controls className="mt-2 w-full">
                 <source src={tweetState.audio} type="audio/mpeg" />
-                Your browser does not support the audio element.
+                {t("tweetCard.audioUnsupported")}
               </audio>
             )}
 
