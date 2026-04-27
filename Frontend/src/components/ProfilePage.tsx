@@ -9,6 +9,7 @@ import {
   Camera,
   LinkIcon,
   MapPin,
+  Phone,
   Settings,
 } from "lucide-react";
 
@@ -109,7 +110,7 @@ const ProfilePage = () => {
   const { i18n, t } = useTranslation();
   const [activeTab, setActiveTab] = useState("posts");
   const [showEditModal, setShowEditModal] = useState(false);
-  const [tweets, setTweets] = useState<any>([]);
+  const [tweets, setTweets] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchTweets = async () => {
@@ -131,13 +132,15 @@ const ProfilePage = () => {
   if (!user) return null;
 
   const locale = i18n.resolvedLanguage || "en";
-  const userTweets = tweets.filter((tweet: any) => tweet?.author?._id === user._id);
+  const userTweets = tweets.filter(
+    (tweet: any) => tweet?.author?._id === user._id,
+  );
 
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between sticky top-0 bg-black/90 backdrop-blur-md border-b border-gray-800 z-10">
-        <div className="flex items-center px-4 py-2 space-x-6">
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-800 bg-black/90 backdrop-blur-md">
+        <div className="flex min-w-0 items-center space-x-3 px-3 py-2 sm:space-x-6 sm:px-4">
           <Button
             variant="ghost"
             size="sm"
@@ -145,38 +148,42 @@ const ProfilePage = () => {
           >
             <ArrowLeft className="h-5 w-5 text-white" />
           </Button>
-          <div>
-            <h1 className="text-xl font-bold text-white">{user?.displayName}</h1>
-            <p className="text-sm text-gray-400">
+          <div className="min-w-0">
+            <h1 className="truncate text-base font-bold text-white sm:text-xl">
+              {user.displayName}
+            </h1>
+            <p className="text-xs text-gray-400 sm:text-sm">
               {t("profile.postsCount", { count: userTweets.length })}
             </p>
           </div>
         </div>
-        <div className="ml-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="m-4 rounded-full p-2 hover:bg-gray-900"
-              >
-                <Settings className="text-white h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
 
-            <DropdownMenuContent
-              align="end"
-              className="w-56 bg-black border border-gray-800 rounded-xl shadow-lg p-2"
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="m-2 rounded-full p-2 hover:bg-gray-900 sm:m-4"
             >
-              <DropdownMenuItem className="text-white hover:bg-gray-900 rounded-md cursor-pointer"> {t("sidebar.settings")}</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+              <Settings className="text-white h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent
+            align="end"
+            className="w-56 bg-black border border-gray-800 rounded-xl shadow-lg p-2"
+          >
+            <DropdownMenuItem className="text-white hover:bg-gray-900 rounded-md cursor-pointer">
+              {" "}
+              {t("sidebar.settings")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Cover Photo */}
       <div className="relative">
-        <div className="h-48 bg-stone-800 relative">
+        <div className="relative h-36 bg-stone-800 sm:h-48">
           <Button
             variant="ghost"
             size="sm"
@@ -187,25 +194,25 @@ const ProfilePage = () => {
         </div>
 
         {/* Profile Picture */}
-        <div className="absolute bottom-0 left-5">
+        <div className="absolute bottom-0 left-3 sm:left-5">
           <div className="relative">
-            <Avatar className="h-36 w-36 border-4 border-black">
-              <AvatarImage src={user?.avatar} />
+            <Avatar className="h-24 w-24 border-4 border-black sm:h-36 sm:w-36">
+              <AvatarImage src={user.avatar} />
             </Avatar>
             <Button
               variant="ghost"
               size="sm"
-              className="absolute bottom-2 right-2 p-2 rounded-full bg-black/70 hover:bg-black/90"
+              className="absolute bottom-2 right-2 rounded-full bg-black/70 p-2 hover:bg-black/90"
             >
               <Camera className="h-4 w-4 text-white" />
             </Button>
           </div>
         </div>
         {/* Edit Profile Button */}
-        <div className="flex justify-end p-4">
+        <div className="flex justify-end p-3 sm:p-4">
           <Button
             variant="outline"
-            className="border-gray-600 bg-transparent text-white font-semibold rounded-full px-6 hover:bg-stone-800 hover:text-white"
+            className="rounded-full border-gray-600 bg-transparent px-4 text-xs font-semibold text-white hover:bg-stone-800 hover:text-white sm:px-6 sm:text-sm"
             onClick={() => setShowEditModal(true)}
           >
             {t("profile.editProfile")}
@@ -213,8 +220,8 @@ const ProfilePage = () => {
         </div>
       </div>
       {/* Profile Info */}
-      <div className="px-4 pb-4 mt-2">
-        <div className="flex items-start justify-between mb-3">
+      <div className="mt-2 px-4 pb-4">
+        <div className="mb-3 flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold text-white">
               {user.displayName}
@@ -222,10 +229,12 @@ const ProfilePage = () => {
             <p className="text-gray-400">@{user.userName}</p>
           </div>
         </div>
+
         {user.bio && (
           <p className="text-white mb-3 leading-relaxed">{user.bio}</p>
         )}
-        <div className="flex items-center space-x-4 text-gray-400 text-sm mb-3">
+
+        <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-400">
           <div className="flex items-center space-x-1">
             <MapPin className="h-4 w-4" />
             <span>{user.location || t("profile.defaultLocation")}</span>
@@ -239,7 +248,7 @@ const ProfilePage = () => {
           <div className="flex items-center space-x-1">
             <Calendar className="h-4 w-4" />
             <span>
-              {t("profile.joined")}{" "}
+              {t("profile.joined")}
               {user.joinedDate &&
                 new Date(user.joinedDate).toLocaleDateString(locale, {
                   month: "long",
@@ -247,80 +256,82 @@ const ProfilePage = () => {
                 })}
             </span>
           </div>
+          <div className="flex items-center space-x-1">
+            <Phone className="h-4 w-4" />
+            <span>{user.phone}</span>
+          </div>
         </div>
-        <div className="flex justify-between items-center">
-          <div className="flex gap-3">
-            <span className="text-sm text-gray-400 cursor-pointer hover:border-b hover:border-white  ">
+
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap gap-3">
+            <span className="cursor-pointer text-sm text-gray-400 hover:border-b hover:border-white">
               {t("profile.following", { count: 0 })}
             </span>
-            <span className="text-sm text-gray-400 cursor-pointer hover:border-b hover:border-white  ">
-               {t("profile.followers", { count: 0 })}
+            <span className="text-sm text-gray-400 cursor-pointer hover:border-b hover:border-white">
+              {t("profile.followers", { count: 0 })}
             </span>
           </div>
-          <div className="flex justify-between items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-2 items-center rounded-lg bg-transparent hover:bg-transparent hover:border-b "
-              onClick={() => setNotificationsEnabled((prev: any) => !prev)}
-            >
-              {notificationsEnabled ? (
-                <Bell className="text-white" />
-              ) : (
-                <BellOff className="text-red-500" />
-              )}
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="items-center rounded-lg bg-transparent p-2 hover:border-b hover:bg-transparent"
+            onClick={() => setNotificationsEnabled((prev: any) => !prev)}
+          >
+            {notificationsEnabled ? (
+              <Bell className="text-white" />
+            ) : (
+              <BellOff className="text-red-500" />
+            )}
+          </Button>
         </div>
       </div>
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 bg-transparent border-b border-gray-800 rounded-none h-auto">
+        <TabsList className="flex h-auto w-full justify-start overflow-x-auto rounded-none border-b border-gray-800 bg-transparent">
           <TabsTrigger
             value="posts"
-            className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
+            className="min-w-max px-4 py-4 font-semibold text-gray-400 hover:bg-gray-900/50 data-[state=active]:rounded-none data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:bg-transparent data-[state=active]:text-white"
           >
             {t("profile.posts")}
           </TabsTrigger>
           <TabsTrigger
             value="replies"
-            className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
+            className="min-w-max px-4 py-4 font-semibold text-gray-400 hover:bg-gray-900/50 data-[state=active]:rounded-none data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:bg-transparent data-[state=active]:text-white"
           >
             {t("profile.replies")}
           </TabsTrigger>
           <TabsTrigger
             value="highlights"
-            className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
+            className="min-w-max px-4 py-4 font-semibold text-gray-400 hover:bg-gray-900/50 data-[state=active]:rounded-none data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:bg-transparent data-[state=active]:text-white"
           >
             {t("profile.highlights")}
           </TabsTrigger>
           <TabsTrigger
             value="articles"
-            className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
+            className="min-w-max px-4 py-4 font-semibold text-gray-400 hover:bg-gray-900/50 data-[state=active]:rounded-none data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:bg-transparent data-[state=active]:text-white"
           >
             {t("profile.articles")}
           </TabsTrigger>
           <TabsTrigger
             value="media"
-            className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
+            className="min-w-max px-4 py-4 font-semibold text-gray-400 hover:bg-gray-900/50 data-[state=active]:rounded-none data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:bg-transparent data-[state=active]:text-white"
           >
             {t("profile.media")}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="posts">
-          <div>
-            {loading || userTweets.length === 0 ? (
-              <div className="py-10 text-center text-gray-500">
-                {t("profile.noPosts")}
-              </div>
-            ) : (
-              userTweets.map((tweet: any) => (
-                <TweetCard key={tweet._id} tweet={tweet} />
-              ))
-            )}
-          </div>
+          {loading || userTweets.length === 0 ? (
+            <div className="py-10 text-center text-gray-500">
+              {t("profile.noPosts")}
+            </div>
+          ) : (
+            userTweets.map((tweet: any) => (
+              <TweetCard key={tweet._id} tweet={tweet} />
+            ))
+          )}
         </TabsContent>
       </Tabs>
+
       <Editprofile
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}

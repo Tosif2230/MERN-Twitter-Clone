@@ -11,10 +11,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
   Bell,
   Bookmark,
+  ChevronLeft,
   CreditCard,
   Home,
   LogOut,
   Mail,
+  Menu,
   MoreHorizontal,
   Search,
   Settings,
@@ -23,10 +25,17 @@ import {
 import { useAuth } from "@/src/context/AuthContext";
 import { useTranslation } from "react-i18next";
 import LanguageSelector from "../language/LanguageSelector";
+import { cn } from "@/src/lib/utils";
 
-const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
+const Sidebar = ({
+  currentPage = "home",
+  onNavigate,
+  onClose,
+  isMobile = false,
+}: any) => {
   const { user, logout } = useAuth();
   const { t } = useTranslation();
+  const isCompact = !isMobile;
 
   const navigation = [
     {
@@ -81,9 +90,24 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
   ];
 
   return (
-    <div className="flex flex-col h-screen w-20 lg:w-64 bg-black sticky top-0 px-2">
-      <div className="p-4">
+    <div
+      className={cn(
+        "flex h-screen flex-col bg-black px-2",
+        isMobile ? "w-72" : "sticky top-0 w-20 lg:w-64",
+      )}
+    >
+      <div className="flex items-center justify-between p-4">
         <TwitterLogo size="lg" className="text-white" />
+        {isMobile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full text-white hover:bg-stone-900"
+            onClick={onClose}
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+        )}
       </div>
       <nav className="flex-1 px-2">
         <ul className="space-y-2">
@@ -91,13 +115,18 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
             <li key={item.page}>
               <Button
                 variant="ghost"
-                className={`w-full justify-center lg:justify-start text-xl py-4 lg:py-6 px-2 lg:px-4 rounded-full hover:bg-stone-900 ${
+                className={`w-full justify-start text-xl py-4 lg:py-6 px-2 rounded-full hover:bg-stone-900 ${
                   item.current ? "font-bold" : "font-normal"
                 } text-white hover:text-white`}
-                onClick={() => onNavigate(item.page)}
+                onClick={() => {
+                  onNavigate(item.page);
+                  if (isMobile && onClose) onClose();
+                }}
               >
-                <item.icon className="h-7 w-7 lg:mr-4" />
-                <span className="hidden lg:inline">{item.name}</span>
+                <item.icon className="h-7 w-7 mr-4" />
+                <span className={cn(isCompact && "hidden lg:inline")}>
+                  {item.name}
+                </span>
                 {item.badge && (
                   <span className="ml-2 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     1
@@ -109,7 +138,10 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
         </ul>
         <div className="mt-4 px-2 py-2">
           <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-full text-lg">
-            {t("sidebar.post")}
+            {isCompact ? <Menu className="h-5 w-5 lg:hidden" /> : t("sidebar.post")}
+            <span className={cn(isCompact && "hidden lg:inline")}>
+              {isCompact ? t("sidebar.post") : ""}
+            </span>
           </Button>
         </div>
       </nav>
@@ -121,17 +153,19 @@ const Sidebar = ({ currentPage = "home", onNavigate }: any) => {
                 variant="ghost"
                 className="w-full justify-start p-3 h-auto rounded-full hover:bg-stone-900"
               >
-                <Avatar className="h-10 w-10 mr-3">
+                <Avatar className={cn("h-10 w-10", !isCompact && "mr-3")}>
                   <AvatarImage src={user.avatar} alt={user.displayName} />
                   <AvatarFallback>{user.displayName[0]}</AvatarFallback>
                 </Avatar>
-                <div className="flex-1 text-left">
+                <div className={cn("flex-1 text-left", isCompact && "hidden lg:block")}>
                   <div className="text-white font-semibold">
                     {user.displayName}
                   </div>
                   <div className="text-gray-400 text-sm">@{user.userName}</div>
                 </div>
-                <MoreHorizontal className="h-5 w-5 text-gray-400" />
+                <MoreHorizontal
+                  className={cn("h-5 w-5 text-gray-400", isCompact && "hidden lg:block")}
+                />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56 border-gray-800 bg-black">

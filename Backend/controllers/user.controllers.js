@@ -50,12 +50,35 @@ export async function loginUser(req, res) {
 //Update profile
 export async function updateUser(req, res) {
   try {
-    const { email } = req.params;
+    const normalizeEmail = (value = "") => value.trim().toLowerCase();
+    const normalizePhone = (value = "") => {
+      const trimmed = value.trim().replace(/[\s()-]/g, "");
+      if (trimmed.startsWith("00")) return `+${trimmed.slice(2)}`;
+      return trimmed;
+    };
+
+    const email = normalizeEmail(req.params.email || "");
+    if (!email) {
+      return res.status(400).send({ error: "Email Required." });
+    }
+
+    const profileUpdate = {
+      displayName: req.body.displayName ?? "",
+      bio: req.body.bio ?? "",
+      location: req.body.location ?? "",
+      website: req.body.website ?? "",
+      avatar: req.body.avatar ?? "",
+      phone: normalizePhone(req.body.phone || ""),
+    };
+
     const updated = await UserModel.findOneAndUpdate(
       { email },
-      { $set: req.body },
+      { $set: profileUpdate },
       { returnDocument: "after", upsert: false },
     );
+    if (!updated) {
+      return res.status(404).send({ error: "User not found" });
+    }
     return res.status(200).send(updated);
   } catch (error) {
     return res.status(400).send({ error: error.message });

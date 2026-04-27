@@ -30,7 +30,7 @@ const suggestions = [
     username: "rashtrapatibhvn",
     displayName: "President of India",
     avatar:
-      "https://lh3.googleusercontent.com/gps-cs-s/AHVAwep9AW7C4basGg7L6-8AF9T-Q0THml4Q3AV3VMr0iWIGayPaGv5093gEu6Y3PvEotIVtdg-xmy5r_nAxq2HCu4Svh8ocHURAt-oafKsMS1VjW8lvJ4qxdewYwbfSSXqufc6jNfU=w270-h312-n-k-no",
+      "https://lh3.googleusercontent.com/gps-cs-s/APNQkAEw8eC36g_V4j0JohhCJ2GE7z1RC8g92wW5lr-e309XJAKqHf3qA_v5ULlY15Qw1ipJ6d42f6qjZIeTo-X-giL8c1EOpYE2cyaYH9bJseV5YO_IPdsBdBWLdtr_Dfyhu-f0-SM=w270-h312-n-k-no",
     verified: true,
   },
 ];
@@ -39,7 +39,7 @@ export default function RightSidebar() {
   const { t } = useTranslation();
 
   return (
-    <div className="w-full max-w-xs space-y-4 sticky top-0">
+    <div className="sticky top-0 w-full max-w-[20rem] space-y-4">
       {/* Search */}
       <div className="sticky top-2 z-50 w-full space-y-4 bg-black">
         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -57,7 +57,7 @@ export default function RightSidebar() {
           <p className="mb-4 text-sm text-gray-400">
             {t("rightSidebar.premiumText")}
           </p>
-          <Button className="rounded-full bg-blue-500 font-semibold text-white hover:bg-blue-600 text-white font-semibold rounded-full">
+          <Button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-full">
             {t("rightSidebar.subscribe")}
           </Button>
         </CardContent>
@@ -65,7 +65,7 @@ export default function RightSidebar() {
       {/* Who to follow */}
       <Card className="bg-black border-gray-800">
         <CardContent className="p-4">
-          <h3 className="mb-4 text-xl font-bold mb-4 text-white">{t("rightSidebar.likeTitle")}</h3>
+          <h3 className="text-xl font-bold mb-4 text-white">{t("rightSidebar.likeTitle")}</h3>
           <div className="space-y-4">
             {suggestions.map((user) => (
               <div

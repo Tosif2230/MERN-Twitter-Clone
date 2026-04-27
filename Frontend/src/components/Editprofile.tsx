@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
-import { Camera, LinkIcon, MapPin, X } from "lucide-react";
+import { Camera, LinkIcon, MapPin, Phone, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
@@ -11,6 +11,15 @@ import axios from "axios";
 import LoadingSpinner from "./Loading-spinner";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import { ConfirmationResult, RecaptchaVerifier } from "firebase/auth";
+import {
+  createLanguagePhoneRecaptcha,
+  getPhoneOtpErrorMessage,
+  isValidE164Phone,
+  normalizeE164Phone,
+  requestLanguagePhoneOtp,
+  verifyLanguagePhoneOtp,
+} from "../lib/languageOtpPipeline";
 
 const Editprofile = ({ isOpen, onClose }: any) => {
   const { user, updateProfile } = useAuth();
@@ -22,10 +31,39 @@ const Editprofile = ({ isOpen, onClose }: any) => {
     location: user?.location || t("profile.defaultLocation"),
     website: user?.website || t("profile.defaultWebsite"),
     avatar: user?.avatar || "",
+    phone: user?.phone || "",
   });
   const [error, setError] = useState<any>({});
+  const [phoneOtp, setPhoneOtp] = useState("");
+  const [isPhoneOtpSent, setIsPhoneOtpSent] = useState(false);
+  const [isPhoneOtpLoading, setIsPhoneOtpLoading] = useState(false);
+  const [isPhoneVerified, setIsPhoneVerified] = useState(Boolean(user?.phone?.trim()));
+  const [phoneConfirmation, setPhoneConfirmation] =
+    useState<ConfirmationResult | null>(null);
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
+  const recaptchaContainerId = useId().replace(/:/g, "_");
 
-  if (!isOpen || !user) return null;
+  useEffect(() => {
+    return () => {
+      recaptchaVerifierRef.current?.clear();
+      recaptchaVerifierRef.current = null;
+    };
+  }, []);
+
+  const phoneChanged = formData.phone.trim() !== (user?.phone || "").trim();
+
+  const getPhoneRecaptcha = () => {
+  if (recaptchaVerifierRef.current) {
+    recaptchaVerifierRef.current.clear();
+    recaptchaVerifierRef.current = null;
+  }
+
+  recaptchaVerifierRef.current = createLanguagePhoneRecaptcha(
+    recaptchaContainerId
+  );
+
+  return recaptchaVerifierRef.current;
+};
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -48,6 +86,15 @@ const Editprofile = ({ isOpen, onClose }: any) => {
       newErrors.location = t("editProfile.locationLong");
     }
 
+    const normalizedPhone = normalizeE164Phone(formData.phone);
+    if (normalizedPhone && !isValidE164Phone(normalizedPhone)) {
+      newErrors.phone = "Use a valid phone in +countrycode format";
+    }
+
+    if (phoneChanged && normalizedPhone && !isPhoneVerified) {
+      newErrors.phone = "Verify phone number with OTP before saving";
+    }
+
     setError(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -58,7 +105,11 @@ const Editprofile = ({ isOpen, onClose }: any) => {
 
     setIsLoading(true);
     try {
-      await updateProfile(formData);
+      const normalizedPhone = normalizeE164Phone(formData.phone);
+      await updateProfile({
+        ...formData,
+        phone: normalizedPhone,
+      });
       toast.success(t("editProfile.profileUpdated"));
       onClose();
     } catch {
@@ -70,8 +121,71 @@ const Editprofile = ({ isOpen, onClose }: any) => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    if (field === "phone") {
+      const isSameAsStored = value.trim() === (user?.phone || "").trim();
+      setIsPhoneVerified(isSameAsStored && value.trim().length > 0);
+      setIsPhoneOtpSent(false);
+      setPhoneOtp("");
+      setPhoneConfirmation(null);
+    }
     if (error[field]) {
       setError((prev: any) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const handleSendPhoneOtp = async () => {
+    const normalizedPhone = normalizeE164Phone(formData.phone);
+    if (!normalizedPhone) {
+      toast.error("Please enter phone number");
+      return;
+    }
+
+    if (!isValidE164Phone(normalizedPhone)) {
+      toast.error("Phone must be in +countrycode format (example: +919876543210)");
+      return;
+    }
+
+    setIsPhoneOtpLoading(true);
+    try {
+      const verifier = getPhoneRecaptcha();
+      const confirmation = await requestLanguagePhoneOtp(normalizedPhone, verifier);
+      setFormData((prev) => ({ ...prev, phone: normalizedPhone }));
+      setPhoneConfirmation(confirmation);
+      setIsPhoneOtpSent(true);
+      setIsPhoneVerified(false);
+      toast.success("OTP sent to mobile number");
+    } catch (otpError: any) {
+      toast.error(getPhoneOtpErrorMessage(otpError));
+      recaptchaVerifierRef.current?.clear();
+      recaptchaVerifierRef.current = null;
+    } finally {
+      setIsPhoneOtpLoading(false);
+    }
+  };
+
+  const handleVerifyPhoneOtp = async () => {
+    if (!phoneConfirmation) {
+      toast.error("Send OTP first");
+      return;
+    }
+
+    if (!phoneOtp.trim()) {
+      toast.error("Please enter OTP");
+      return;
+    }
+
+    setIsPhoneOtpLoading(true);
+    try {
+      await verifyLanguagePhoneOtp(phoneConfirmation, phoneOtp.trim());
+      setIsPhoneVerified(true);
+      setIsPhoneOtpSent(false);
+      setPhoneOtp("");
+      setPhoneConfirmation(null);
+      toast.success("Phone number verified");
+    } catch (otpError: any) {
+      toast.error(getPhoneOtpErrorMessage(otpError));
+    } finally {
+      setIsPhoneOtpLoading(false);
     }
   };
 
@@ -99,12 +213,14 @@ const Editprofile = ({ isOpen, onClose }: any) => {
     }
   };
 
+  if (!isOpen || !user) return null;
+
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-2xl bg-black border-gray-800 text-white max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-0 sm:p-4">
+      <Card className="h-[100dvh] w-full max-w-2xl overflow-y-auto rounded-none border-gray-800 bg-black text-white sm:h-auto sm:max-h-[90vh] sm:rounded-xl">
         <CardHeader className="relative pb-4 border-b border-gray-800">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex min-w-0 items-center space-x-2 sm:space-x-4">
               <Button
                 variant="ghost"
                 size="icon"
@@ -114,12 +230,12 @@ const Editprofile = ({ isOpen, onClose }: any) => {
               >
                 <X className="h-5 w-5" />
               </Button>
-              <CardTitle>{t("editProfile.title")}</CardTitle>
+              <CardTitle className="truncate text-base sm:text-xl">{t("editProfile.title")}</CardTitle>
             </div>
             <Button
               type="submit"
               form="edit-profile-form"
-              className="bg-white text-black hover:bg-gray-200 font-semibold rounded-full px-6"
+              className="rounded-full bg-white px-4 text-xs font-semibold text-black hover:bg-gray-200 sm:px-6 sm:text-sm"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -144,7 +260,7 @@ const Editprofile = ({ isOpen, onClose }: any) => {
           <form id="edit-profile-form" onSubmit={handleSubmit}>
             {/* Cover photo */}
             <div className="relative">
-              <div className="h-48 bg-gradient-to-r from-blue-600 to-purple-600 relative">
+              <div className="h-32 sm:h-48 bg-gradient-to-r from-blue-600 to-purple-600 relative">
                 <Button
                   type="button"
                   variant="ghost"
@@ -157,9 +273,9 @@ const Editprofile = ({ isOpen, onClose }: any) => {
               </div>
 
               {/* Profile Picture */}
-              <div className="absolute -bottom-16 left-4">
+              <div className="absolute -bottom-12 left-3 sm:-bottom-16 sm:left-4">
                 <div className="relative">
-                  <Avatar className="h-32 w-32 border-4 border-black">
+                  <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-4 border-black">
                     <AvatarImage src={user?.avatar} alt={user?.displayName} />
                     <AvatarFallback className="text-2xl">
                       {user?.displayName?.[0]}
@@ -189,7 +305,7 @@ const Editprofile = ({ isOpen, onClose }: any) => {
               </div>
             </div>
 
-            <div className="p-4 mt-16 space-y-6">
+            <div className="p-4 mt-12 sm:mt-16 space-y-6">
               {/* Display Name */}
               <div className="space-y-2">
                 <Label htmlFor="displayName" className="text-white">
@@ -293,8 +409,67 @@ const Editprofile = ({ isOpen, onClose }: any) => {
                   </p>
                 </div>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="text-white">
+                  {t("auth.phone")}
+                </Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                    className="pl-10 bg-transparent border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                    placeholder="Enter Your Phone No. With country Code"
+                    disabled={isLoading || isPhoneOtpLoading}
+                  />
+                </div>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="border-gray-600 bg-transparent text-white hover:bg-stone-800 hover:text-white"
+                    onClick={handleSendPhoneOtp}
+                    disabled={
+                      isLoading ||
+                      isPhoneOtpLoading ||
+                      !formData.phone.trim() ||
+                      (!phoneChanged && !!user.phone?.trim())
+                    }
+                  >
+                    {isPhoneOtpLoading ? t("editProfile.saving") : "Send OTP"}
+                  </Button>
+                  {isPhoneVerified && (
+                    <span className="text-sm text-green-400">Verified</span>
+                  )}
+                </div>
+                {isPhoneOtpSent && (
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <Input
+                      type="text"
+                      value={phoneOtp}
+                      onChange={(e) => setPhoneOtp(e.target.value)}
+                      className="bg-transparent border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                      placeholder={t("composer.enterOtp")}
+                      disabled={isLoading || isPhoneOtpLoading}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-gray-600 bg-transparent text-white hover:bg-stone-800 hover:text-white"
+                      onClick={handleVerifyPhoneOtp}
+                      disabled={isLoading || isPhoneOtpLoading || !phoneOtp.trim()}
+                    >
+                      {t("composer.verifyOtp")}
+                    </Button>
+                  </div>
+                )}
+                {error.phone && <p className="text-red-400 text-sm">{error.phone}</p>}
+              </div>
             </div>
           </form>
+          <div id={recaptchaContainerId}></div>
         </CardContent>
       </Card>
     </div>

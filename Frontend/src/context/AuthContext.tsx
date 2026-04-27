@@ -49,6 +49,7 @@ interface AuthContextType {
     location: string;
     website: string;
     avatar: string;
+    phone: string;
   }) => Promise<void>;
   logout: () => void;
   googleSignin: () => void;
@@ -204,27 +205,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     location: string;
     website: string;
     avatar: string;
+    phone: string;
   }) => {
     if (!user) return;
 
     setIsLoading(true);
 
-    // await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const res = await axiosInstance.patch(
+        `/api/updateUser/${encodeURIComponent(user.email)}`,
+        {
+          displayName: profileData.displayName,
+          bio: profileData.bio,
+          location: profileData.location,
+          website: profileData.website,
+          avatar: profileData.avatar,
+          phone: profileData.phone,
+        },
+      );
 
-    const updatedUser: User = {
-      ...user,
-      ...profileData,
-    };
-    const res = await axiosInstance.patch(
-      `/api/updateUser/${user.email}`,
-      updatedUser,
-    );
-    if (res.data) {
-      setUser(updatedUser);
-      localStorage.setItem("twitter-user", JSON.stringify(updatedUser));
+      if (res.data) {
+        setUser(res.data);
+        localStorage.setItem("twitter-user", JSON.stringify(res.data));
+      }
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const googleSignin = async () => {
