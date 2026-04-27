@@ -136,25 +136,38 @@ export async function confirmSubscription(req, res) {
 
     await user.save();
 
-    let emailSent = false;
-    try {
-      emailSent = await sendSubscriptionEmail({
-        email: user.email,
-        userName: user.displayName,
-        planName: plan.name,
-        amount: plan.price,
-        paymentId,
-        subscribedAt,
-        expiresAt,
-      });
-    } catch (err) {
-      console.error("Email failed:", err.message);
-    }
-
-    return res.status(200).json({
+    // Send response immediately so UI can update plan without waiting on email I/O.
+    const responsePayload = {
       message: "Subscription activated successfully",
-      emailSent,
+      emailSent: false,
+      subscription: {
+        currentPlan: plan.name,
+        price: plan.price,
+        subscriptionDate: subscribedAt,
+        subscriptionExpiresAt: expiresAt,
+      },
+    };
+
+    res.status(200).json(responsePayload);
+
+    // Fire-and-forget invoice email after response.
+    void (async () => {
+      try {
+        await sendSubscriptionEmail({
+          email: user.email,
+          userName: user.displayName,
+          planName: plan.name,
+          amount: plan.price,
+          paymentId,
+          subscribedAt,
+          expiresAt,
+        });
+      } catch (err) {
+        console.error("Email failed:", err.message);
+      }
     });
+
+    return;
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

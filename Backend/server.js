@@ -7,6 +7,7 @@ import authRoute from "./routes/auth.route.js";
 import tweetRoute from "./routes/tweet.route.js"
 import audioRoute from "./routes/audio.route.js";
 import otpRoute from "./routes/otp.route.js";
+import languageOtpRoute from "./routes/languageOtp.route.js";
 import subscriptionRoute from "./routes/subscription.route.js";
 import { configureCloudinary } from "./services/cloudinary.service.js";
 
@@ -29,6 +30,7 @@ app.get("/", (req, res) => {
 authRoute(app);
 tweetRoute(app);
 otpRoute(app)
+languageOtpRoute(app);
 audioRoute(app)
 subscriptionRoute(app)
 const port = process.env.PORT || 5000;

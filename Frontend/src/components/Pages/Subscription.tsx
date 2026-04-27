@@ -128,8 +128,24 @@ const Subscription = () => {
       razorpaySignature,
     });
 
-    await refreshUser();
-    await fetchSubscriptionStatus();
+    const confirmedSubscription = res.data?.subscription;
+    if (confirmedSubscription) {
+      setStatus((prev) => ({
+        currentPlan: confirmedSubscription.currentPlan,
+        price: confirmedSubscription.price,
+        tweetLimit:
+          prev?.tweetLimit && prev.tweetLimit === "Unlimited"
+            ? "Unlimited"
+            : prev?.tweetLimit ?? 0,
+        usedTweets: prev?.usedTweets ?? 0,
+        remainingTweets: prev?.remainingTweets ?? 0,
+        paymentWindowOpen: prev?.paymentWindowOpen ?? false,
+        subscriptionExpiresAt: confirmedSubscription.subscriptionExpiresAt,
+      }));
+      setSelectedPlan(confirmedSubscription.currentPlan);
+    }
+
+    await Promise.all([refreshUser(), fetchSubscriptionStatus()]);
 
     toast.success(t("subscription.toastActivated", { plan: planName }));
     return (
