@@ -89,7 +89,7 @@
       "posting": "Publication...",
       "postSuccess": "Publication réussie",
       "postError": "Échec de la publication",
-      "audioTime": "Téléchargement audio autorisé uniquement de 14 h à 19 h",
+      "audioTime": "Le téléchargement audio est autorisé uniquement de 14h à 19h (IST).",
       "audioSize": "100 Mo maximum autorisés",
       "audioMinutes": "5 minutes maximum",
       "otpSent": "OTP envoyé à votre e-mail",

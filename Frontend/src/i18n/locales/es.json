@@ -89,7 +89,7 @@
       "posting": "Publicando...",
       "postSuccess": "Publicación realizada con éxito",
       "postError": "No se pudo publicar",
-      "audioTime": "La carga de audio solo está permitida de 2 PM a 7 PM",
+      "audioTime": "La carga de audio solo está permitida de 14:00 a 19:00 (hora estándar de la India).",
       "audioSize": "Máximo permitido: 100 MB",
       "audioMinutes": "Máximo 5 minutos",
       "otpSent": "OTP enviado a tu correo",

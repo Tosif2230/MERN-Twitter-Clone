@@ -89,7 +89,7 @@
       "posting": "Posting tweet...",
       "postSuccess": "Tweet posted successfully",
       "postError": "Failed to post tweet",
-      "audioTime": "Audio upload allowed only 2PM to 7PM",
+      "audioTime": "Audio upload allowed only 2PM to 7PM (IST)",
       "audioSize": "Max 100MB allowed",
       "audioMinutes": "Max 5 minutes",
       "otpSent": "OTP sent to your email",

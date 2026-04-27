@@ -36,6 +36,17 @@ const TweetComposer = ({ onTweetposted }: any) => {
   const [isAudioUploaded, setIsAudioUploaded] = useState(false);
 
   const maxLength = 200;
+  const isAudioUploadWindowOpenIST = () => {
+    const indiaDate = new Date(
+      new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }),
+    );
+    const hour = indiaDate.getHours();
+    const minutes = indiaDate.getMinutes();
+    const totalMinutes = hour * 60 + minutes;
+    const startMinutes = 14 * 60; // 2:00 PM IST
+    const endMinutes = 19 * 60; // 7:00 PM IST
+    return totalMinutes >= startMinutes && totalMinutes <= endMinutes;
+  };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -117,9 +128,8 @@ const TweetComposer = ({ onTweetposted }: any) => {
       const file = e.target.files[0];
       if (!file) return;
 
-      // Time check
-      const hour = new Date().getHours();
-      if (hour <= 14 || hour >= 19) {
+      // Time check (strict IST window 2:00 PM to 7:00 PM)
+      if (!isAudioUploadWindowOpenIST()) {
         toast.error(t("composer.audioTime"));
         setIsLoading(false);
         return;

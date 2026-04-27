@@ -1,5 +1,14 @@
 import AudioModel from "../models/audio.model.js";
 import cloudinary from "../services/cloudinary.service.js";
+import { getIndianTimeData } from "../services/subscription.service.js";
+
+const isAudioUploadWindowOpenIST = () => {
+  const { hour, minutes } = getIndianTimeData();
+  const totalMinutes = hour * 60 + minutes;
+  const startMinutes = 14 * 60; // 2:00 PM IST
+  const endMinutes = 19 * 60; // 7:00 PM IST
+  return totalMinutes >= startMinutes && totalMinutes <= endMinutes;
+};
 
 export const uploadAudio = async (req, res) => {
   try {
@@ -8,9 +17,10 @@ export const uploadAudio = async (req, res) => {
 
     if (!file) return res.status(400).json({ message: "No file" });
 
-    const hour = new Date().getHours();
-    if (hour < 14 || hour > 19) {
-      return res.status(403).json({ message: "2PM–7PM only" });
+    if (!isAudioUploadWindowOpenIST()) {
+      return res
+        .status(403)
+        .json({ message: "Audio upload allowed only 2:00 PM to 7:00 PM IST" });
     }
 
     if (Number(duration) > 300) {
@@ -22,9 +32,9 @@ export const uploadAudio = async (req, res) => {
     const result = await cloudinary.uploader.upload(
       `data:audio/mp3;base64,${base64}`,
       {
-        resource_type: "video", // audio = video type
+        resource_type: "video",
         folder: "audio",
-      }
+      },
     );
 
     await AudioModel.create({
@@ -36,7 +46,6 @@ export const uploadAudio = async (req, res) => {
     res.json({
       audioUrl: result.secure_url,
     });
-
   } catch (err) {
     console.log("UPLOAD ERROR:", err);
     res.status(500).json({ message: err.message });

@@ -89,7 +89,7 @@
       "posting": "正在发布...",
       "postSuccess": "发布成功",
       "postError": "发布失败",
-      "audioTime": "仅允许在下午 2 点到 7 点上传音频",
+      "audioTime": "音频上传仅允许在下午 2 点至晚上 7 点（印度标准时间）之间进行。",
       "audioSize": "最大允许 100MB",
       "audioMinutes": "最长 5 分钟",
       "otpSent": "验证码已发送到你的邮箱",

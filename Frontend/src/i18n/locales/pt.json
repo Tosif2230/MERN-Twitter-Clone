@@ -89,7 +89,7 @@
       "posting": "Publicando...",
       "postSuccess": "Publicação realizada com sucesso",
       "postError": "Falha ao publicar",
-      "audioTime": "Upload de áudio permitido apenas das 14h às 19h",
+      "audioTime": "O envio de ficheiros áudio só é permitido entre as 14h00 e as 19h00 (hora padrão da Índia).",
       "audioSize": "Máximo de 100 MB permitido",
       "audioMinutes": "Máximo de 5 minutos",
       "otpSent": "OTP enviado para seu e-mail",
