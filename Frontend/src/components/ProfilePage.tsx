@@ -295,6 +295,12 @@ const ProfilePage = () => {
             {t("profile.posts")}
           </TabsTrigger>
           <TabsTrigger
+            value="loginHistory"
+            className="min-w-max px-4 py-4 font-semibold text-gray-400 hover:bg-gray-900/50 data-[state=active]:rounded-none data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:bg-transparent data-[state=active]:text-white"
+          >
+            {t("profile.history")}
+          </TabsTrigger>
+          <TabsTrigger
             value="replies"
             className="min-w-max px-4 py-4 font-semibold text-gray-400 hover:bg-gray-900/50 data-[state=active]:rounded-none data-[state=active]:border-b-4 data-[state=active]:border-b-blue-500 data-[state=active]:bg-transparent data-[state=active]:text-white"
           >

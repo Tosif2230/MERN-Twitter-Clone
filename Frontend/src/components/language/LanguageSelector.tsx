@@ -1,21 +1,17 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, Languages } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { ConfirmationResult, RecaptchaVerifier } from "firebase/auth";
 import { toast } from "react-toastify";
 
 import { cn } from "@/src/lib/utils";
 import {
-  createLanguagePhoneRecaptcha,
   getPhoneOtpErrorMessage,
   isValidE164Phone,
   normalizeE164Phone,
-  requestFrenchLanguageEmailOtp,
-  requestLanguagePhoneOtp,
-  verifyFrenchLanguageEmailOtp,
-  verifyLanguagePhoneOtp,
+  requestLanguageOtp,
+  verifyLanguageOtp,
 } from "@/src/lib/languageOtpPipeline";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -70,18 +66,6 @@ export default function LanguageSelector({
   const [pendingLanguage, setPendingLanguage] = useState<string | null>(null);
   const [pendingEmail, setPendingEmail] = useState("");
   const [pendingPhone, setPendingPhone] = useState("");
-  const [phoneConfirmation, setPhoneConfirmation] =
-    useState<ConfirmationResult | null>(null);
-  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
-  const recaptchaContainerId = useId().replace(/:/g, "_");
-
-  useEffect(() => {
-    return () => {
-      recaptchaVerifierRef.current?.clear();
-      recaptchaVerifierRef.current = null;
-    };
-  }, []);
-
   const selectedLanguage = i18n.resolvedLanguage || i18n.language || "en";
   const selectedLanguageLabel =
     languages.find((language) => language.code === selectedLanguage)?.label ||
@@ -90,18 +74,6 @@ export default function LanguageSelector({
   const applyLanguage = async (lang: string) => {
     i18n.changeLanguage(lang);
     localStorage.setItem("i18nextLng", lang);
-  };
-
-  const getPhoneRecaptcha = () => {
-    if (recaptchaVerifierRef.current) {
-      recaptchaVerifierRef.current.clear();
-      recaptchaVerifierRef.current = null;
-    }
-
-    recaptchaVerifierRef.current =
-      createLanguagePhoneRecaptcha(recaptchaContainerId);
-
-    return recaptchaVerifierRef.current;
   };
 
   const getStoredUser = (): StoredUser | null => {
@@ -124,14 +96,11 @@ export default function LanguageSelector({
     setPendingLanguage(null);
     setPendingEmail("");
     setPendingPhone("");
-    setPhoneConfirmation(null);
   };
 
   const closeOtpDialogManually = () => {
     resetOtpState();
     toast.info("Language change cancelled");
-    recaptchaVerifierRef.current?.clear();
-    recaptchaVerifierRef.current = null;
   };
 
   const handleVerifyOtp = async () => {
@@ -143,21 +112,18 @@ export default function LanguageSelector({
 
     setIsOtpSubmitting(true);
     try {
-      if (otpMode === "email") {
-        await verifyFrenchLanguageEmailOtp(pendingEmail, otp);
-      } else {
-        if (!phoneConfirmation) {
-          toast.error("Send OTP first");
-          return;
-        }
-        await verifyLanguagePhoneOtp(phoneConfirmation, otp);
+      const verifyResponse = await verifyLanguageOtp(
+        pendingEmail,
+        otp,
+        pendingLanguage,
+      );
+      if (verifyResponse?.user) {
+        localStorage.setItem("twitter-user", JSON.stringify(verifyResponse.user));
       }
 
       await applyLanguage(pendingLanguage);
       toast.success("Language updated successfully");
       resetOtpState();
-      recaptchaVerifierRef.current?.clear();
-      recaptchaVerifierRef.current = null;
     } catch (error: any) {
       toast.error(getPhoneOtpErrorMessage(error));
     } finally {
@@ -177,13 +143,13 @@ export default function LanguageSelector({
     setIsVerifyingLanguage(true);
 
     try {
-      if (lang === "fr") {
-        if (!user.email) {
-          toast.error("Registered email is required for French language");
-          return;
-        }
+      if (!user.email) {
+        toast.error("Registered email is required to change language");
+        return;
+      }
 
-        await requestFrenchLanguageEmailOtp(user.email);
+      if (lang === "fr") {
+        await requestLanguageOtp(user.email, lang);
         toast.success("OTP sent to your registered email");
 
         setOtpMode("email");
@@ -205,22 +171,16 @@ export default function LanguageSelector({
         return;
       }
 
-      const verifier = getPhoneRecaptcha();
-      const confirmationResult = await requestLanguagePhoneOtp(
-        normalizedPhone,
-        verifier,
-      );
+      const otpResponse = await requestLanguageOtp(user.email, lang);
       toast.success("OTP sent to your registered mobile number");
       setOtpMode("phone");
       setPendingLanguage(lang);
-      setPendingPhone(normalizedPhone);
-      setPhoneConfirmation(confirmationResult);
+      setPendingEmail(user.email);
+      setPendingPhone(otpResponse?.phone || normalizedPhone);
       setOtpValue("");
       setOtpDialogOpen(true);
     } catch (error: any) {
       toast.error(getPhoneOtpErrorMessage(error));
-      recaptchaVerifierRef.current?.clear();
-      recaptchaVerifierRef.current = null;
     } finally {
       setIsVerifyingLanguage(false);
     }
@@ -316,7 +276,6 @@ export default function LanguageSelector({
             {languageItems}
           </DropdownMenuSubContent>
         </DropdownMenuSub>
-        <div id={recaptchaContainerId}></div>
         {otpDialog}
       </>
     );
@@ -345,7 +304,6 @@ export default function LanguageSelector({
       >
         {languageItems}
       </DropdownMenuContent>
-      <div id={recaptchaContainerId}></div>
       {otpDialog}
     </DropdownMenu>
   );

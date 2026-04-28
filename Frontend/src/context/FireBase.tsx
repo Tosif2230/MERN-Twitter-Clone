@@ -1,4 +1,4 @@
-import { getApps, initializeApp } from "firebase/app";
+import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -13,11 +13,7 @@ const firebaseConfig = {
 };
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const phoneOtpApp =
-  getApps().find((existingApp) => existingApp.name === "phone-otp-app") ||
-  initializeApp(firebaseConfig, "phone-otp-app");
 export const auth = getAuth(app);
-export const phoneOtpAuth = getAuth(phoneOtpApp);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 

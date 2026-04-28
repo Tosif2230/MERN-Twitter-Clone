@@ -9,6 +9,7 @@ const userSchema = mongoose.Schema({
   bio: { type: String, default: "" },
   website: { type: String, default: "" },
   location: { type: String, default: "" },
+  language: { type: String, default: "en" },
   subscriptionPlan: { type: String, default: "Free" },
   subscriptionPrice: { type: Number, default: 0 },
   subscriptionOrderId: { type: String, default: "" },

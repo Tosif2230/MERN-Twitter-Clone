@@ -3,7 +3,8 @@ import OTP from "../models/otp.model.js";
 export const verifyOTP = async (req, res, next) => {
   const { email, otp } = req.body;
 
-  const record = await OTP.findOne({ email });
+  const normalizedEmail = email?.trim().toLowerCase();
+  const record = await OTP.findOne({ email: normalizedEmail, purpose: "email" });
 
   if (!record) return res.status(400).json({ message: "OTP not found" });
 

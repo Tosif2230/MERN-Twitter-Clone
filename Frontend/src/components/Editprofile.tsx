@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useRef, useState } from "react";
+import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -11,19 +11,17 @@ import axios from "axios";
 import LoadingSpinner from "./Loading-spinner";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
-import { ConfirmationResult, RecaptchaVerifier } from "firebase/auth";
 import {
-  createLanguagePhoneRecaptcha,
   getPhoneOtpErrorMessage,
   isValidE164Phone,
   normalizeE164Phone,
-  requestLanguagePhoneOtp,
-  verifyLanguagePhoneOtp,
+  requestProfilePhoneOtp,
+  verifyProfilePhoneOtp,
 } from "../lib/languageOtpPipeline";
 
 const Editprofile = ({ isOpen, onClose }: any) => {
   const { user, updateProfile } = useAuth();
-  const { t } = useTranslation();
+  const { t } = useTranslation();  //i18next 
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     displayName: user?.displayName || "",
@@ -38,32 +36,9 @@ const Editprofile = ({ isOpen, onClose }: any) => {
   const [isPhoneOtpSent, setIsPhoneOtpSent] = useState(false);
   const [isPhoneOtpLoading, setIsPhoneOtpLoading] = useState(false);
   const [isPhoneVerified, setIsPhoneVerified] = useState(Boolean(user?.phone?.trim()));
-  const [phoneConfirmation, setPhoneConfirmation] =
-    useState<ConfirmationResult | null>(null);
-  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
-  const recaptchaContainerId = useId().replace(/:/g, "_");
-
-  useEffect(() => {
-    return () => {
-      recaptchaVerifierRef.current?.clear();
-      recaptchaVerifierRef.current = null;
-    };
-  }, []);
+  const [verifiedPhone, setVerifiedPhone] = useState((user?.phone || "").trim());
 
   const phoneChanged = formData.phone.trim() !== (user?.phone || "").trim();
-
-  const getPhoneRecaptcha = () => {
-  if (recaptchaVerifierRef.current) {
-    recaptchaVerifierRef.current.clear();
-    recaptchaVerifierRef.current = null;
-  }
-
-  recaptchaVerifierRef.current = createLanguagePhoneRecaptcha(
-    recaptchaContainerId
-  );
-
-  return recaptchaVerifierRef.current;
-};
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -93,6 +68,8 @@ const Editprofile = ({ isOpen, onClose }: any) => {
 
     if (phoneChanged && normalizedPhone && !isPhoneVerified) {
       newErrors.phone = "Verify phone number with OTP before saving";
+    } else if (phoneChanged && normalizedPhone && normalizedPhone !== verifiedPhone) {
+      newErrors.phone = "Verify this phone number with OTP before saving";
     }
 
     setError(newErrors);
@@ -126,7 +103,9 @@ const Editprofile = ({ isOpen, onClose }: any) => {
       setIsPhoneVerified(isSameAsStored && value.trim().length > 0);
       setIsPhoneOtpSent(false);
       setPhoneOtp("");
-      setPhoneConfirmation(null);
+      if (isSameAsStored) {
+        setVerifiedPhone((user?.phone || "").trim());
+      }
     }
     if (error[field]) {
       setError((prev: any) => ({ ...prev, [field]: "" }));
@@ -147,41 +126,43 @@ const Editprofile = ({ isOpen, onClose }: any) => {
 
     setIsPhoneOtpLoading(true);
     try {
-      const verifier = getPhoneRecaptcha();
-      const confirmation = await requestLanguagePhoneOtp(normalizedPhone, verifier);
+      await requestProfilePhoneOtp(normalizedPhone);
       setFormData((prev) => ({ ...prev, phone: normalizedPhone }));
-      setPhoneConfirmation(confirmation);
       setIsPhoneOtpSent(true);
       setIsPhoneVerified(false);
       toast.success("OTP sent to mobile number");
     } catch (otpError: any) {
       toast.error(getPhoneOtpErrorMessage(otpError));
-      recaptchaVerifierRef.current?.clear();
-      recaptchaVerifierRef.current = null;
     } finally {
       setIsPhoneOtpLoading(false);
     }
   };
 
   const handleVerifyPhoneOtp = async () => {
-    if (!phoneConfirmation) {
-      toast.error("Send OTP first");
-      return;
-    }
-
     if (!phoneOtp.trim()) {
       toast.error("Please enter OTP");
       return;
     }
 
+    const normalizedPhone = normalizeE164Phone(formData.phone);
+    if (!normalizedPhone) {
+      toast.error("Please enter phone number");
+      return;
+    }
+
     setIsPhoneOtpLoading(true);
     try {
-      await verifyLanguagePhoneOtp(phoneConfirmation, phoneOtp.trim());
+      await verifyProfilePhoneOtp(normalizedPhone, phoneOtp.trim());
+      await updateProfile({
+        ...formData,
+        phone: normalizedPhone,
+      });
+      setFormData((prev) => ({ ...prev, phone: normalizedPhone }));
       setIsPhoneVerified(true);
+      setVerifiedPhone(normalizedPhone);
       setIsPhoneOtpSent(false);
       setPhoneOtp("");
-      setPhoneConfirmation(null);
-      toast.success("Phone number verified");
+      toast.success("Phone number verified and updated");
     } catch (otpError: any) {
       toast.error(getPhoneOtpErrorMessage(otpError));
     } finally {
@@ -469,7 +450,6 @@ const Editprofile = ({ isOpen, onClose }: any) => {
               </div>
             </div>
           </form>
-          <div id={recaptchaContainerId}></div>
         </CardContent>
       </Card>
     </div>
