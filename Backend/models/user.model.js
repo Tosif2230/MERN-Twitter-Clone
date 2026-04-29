@@ -17,6 +17,18 @@ const userSchema = mongoose.Schema({
   subscriptionDate: { type: Date, default: null },
   subscriptionExpiresAt: { type: Date, default: null },
   resetPasswordRequestedAt: { type: Date, default: null },
+  loginHistory: {
+    type: [
+      {
+        browser: { type: String, default: "Unknown browser" },
+        operatingSystem: { type: String, default: "Unknown OS" },
+        deviceCategory: { type: String, default: "desktop" },
+        ipAddress: { type: String, default: "Unknown IP" },
+        loggedInAt: { type: Date, default: Date.now },
+      },
+    ],
+    default: [],
+  },
   joinedDate: { type: Date, default: Date.now },
 });
 

@@ -135,6 +135,32 @@ const ProfilePage = () => {
   const userTweets = tweets.filter(
     (tweet: any) => tweet?.author?._id === user._id,
   );
+  const loginHistory = (user.loginHistory || []).filter(
+    (session: any, index: number, history: any[]) => {
+      const previous = history[index - 1];
+      if (!previous) return true;
+
+      const loggedInAt = new Date(session.loggedInAt).getTime();
+      const previousLoggedInAt = new Date(previous.loggedInAt).getTime();
+
+      return !(
+        session.browser === previous.browser &&
+        session.operatingSystem === previous.operatingSystem &&
+        session.deviceCategory === previous.deviceCategory &&
+        session.ipAddress === previous.ipAddress &&
+        Math.abs(loggedInAt - previousLoggedInAt) < 10000
+      );
+    },
+  );
+  const formatLoginDate = (date: string) =>
+    new Date(date).toLocaleString(locale, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      second: "2-digit"
+    });
 
   return (
     <div className="min-h-screen">
@@ -335,6 +361,44 @@ const ProfilePage = () => {
               <TweetCard key={tweet._id} tweet={tweet} />
             ))
           )}
+        </TabsContent>
+        <TabsContent value="loginHistory">
+          <div className="divide-y divide-gray-800">
+            {loginHistory.length === 0 ? (
+              <div className="py-10 text-center text-gray-500">
+                {t("profile.noLoginHistory")}
+              </div>
+            ) : (
+              loginHistory.map((session: any, index: number) => (
+                <div
+                  key={`${session.loggedInAt}-${index}`}
+                  className="space-y-2 px-4 py-4 text-sm"
+                >
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="capitalize text-gray-400">
+                      {t("profile.deviceInfo")}:{" "}
+                      {session.deviceCategory || t("profile.defaultDevice")}
+                    </p>
+                    <p className="font-semibold text-white">
+                      {formatLoginDate(session.loggedInAt)}
+                    </p>
+                  </div>
+                  <div className="text-gray-400">
+                    {t("profile.browser")}:{" "}
+                    {session.browser || t("profile.unknownBrowser")}
+                  </div>
+                  <div className="text-gray-400">
+                    {t("profile.operatingSystem")}:{" "}
+                    {session.operatingSystem || t("profile.unknownOS")}
+                  </div>
+                  <div className="break-all font-mono text-gray-300">
+                    {t("profile.ipAddress")}:{" "}
+                    {session.ipAddress || t("profile.unknownIp")}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </TabsContent>
       </Tabs>
 

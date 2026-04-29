@@ -165,6 +165,16 @@
       "bookmarks": "बुकमार्क"
     },
     "profile": {
+      "history": "लॉगिन इतिहास",
+      "noLoginHistory": "अभी तक कोई लॉगिन इतिहास नहीं है",
+      "deviceInfo": "डिवाइस जानकारी",
+      "defaultDevice": "डेस्कटॉप",
+      "browser": "ब्राउज़र",
+      "unknownBrowser": "अज्ञात ब्राउज़र",
+      "operatingSystem": "ओएस",
+      "unknownOS": "अज्ञात OS",
+      "ipAddress": "IP पता",
+      "unknownIp": "अज्ञात IP",
       "postsCount": "{{count}} पोस्ट",
       "editProfile": "प्रोफ़ाइल संपादित करें",
       "joined": "जुड़े",

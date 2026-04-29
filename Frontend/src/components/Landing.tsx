@@ -32,7 +32,10 @@ function Landing() {
       {/* Right side - Content */}
       <div className="flex-1 lg:flex-1 flex flex-col justify-center px-8 lg:px-16 max-w-lg lg:max-w-2xl">
         <div className="mb-6 flex justify-end">
-          <LanguageSelector className="w-48 border-gray-700 bg-black text-white" />
+          <LanguageSelector
+            className="w-48 border-gray-700 bg-black text-white"
+            requireVerification={false}
+          />
         </div>
         <div className="lg:hidden mb-8 text-center">
           <TwitterLogo size="xl" className="text-white mx-auto" />

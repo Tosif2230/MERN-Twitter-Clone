@@ -46,6 +46,7 @@ const languages = [
 interface LanguageSelectorProps {
   className?: string;
   type?: "default" | "dropdownMenu";
+  requireVerification?: boolean;
 }
 
 interface StoredUser {
@@ -56,6 +57,7 @@ interface StoredUser {
 export default function LanguageSelector({
   className,
   type = "default",
+  requireVerification = true,
 }: LanguageSelectorProps) {
   const { i18n, t } = useTranslation();
   const [isVerifyingLanguage, setIsVerifyingLanguage] = useState(false);
@@ -133,6 +135,11 @@ export default function LanguageSelector({
 
   const handleChange = async (lang: string) => {
     if (lang === selectedLanguage || isVerifyingLanguage) return;
+
+    if (!requireVerification) {
+      await applyLanguage(lang);
+      return;
+    }
 
     const user = getStoredUser();
     if (!user) {

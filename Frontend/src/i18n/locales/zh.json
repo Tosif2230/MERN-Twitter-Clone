@@ -165,6 +165,16 @@
       "bookmarks": "书签"
     },
     "profile": {
+      "history": "登录历史",
+      "noLoginHistory": "暂无登录历史",
+      "deviceInfo": "设备信息",
+      "defaultDevice": "桌面设备",
+      "browser": "浏览器",
+      "unknownBrowser": "未知浏览器",
+      "operatingSystem": "操作系统",
+      "unknownOS": "未知操作系统",
+      "ipAddress": "IP 地址",
+      "unknownIp": "未知 IP",
       "postsCount": "{{count}} 条帖子",
       "editProfile": "编辑资料",
       "joined": "加入于",

@@ -8,7 +8,14 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { auth } from "./FireBase";
 import axiosInstance from "../lib/axiosInstance.js";
 import { toast } from "react-toastify";
@@ -31,6 +38,13 @@ interface User {
   subscriptionPaymentId?: string;
   subscriptionDate?: string;
   subscriptionExpiresAt?: string;
+  loginHistory?: {
+    browser: string;
+    operatingSystem: string;
+    deviceCategory: string;
+    ipAddress: string;
+    loggedInAt: string;
+  }[];
 }
 
 interface AuthContextType {
@@ -53,13 +67,30 @@ interface AuthContextType {
   }) => Promise<void>;
   logout: () => void;
   googleSignin: () => void;
-  refreshUser: (email?: string) => Promise<void>;
+  refreshUser: (
+    email?: string,
+    recordLogin?: boolean,
+    forceRecordLogin?: boolean,
+  ) => Promise<void>;
   isLoading: boolean;
   notificationsEnabled: boolean;
   setNotificationsEnabled: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const getLoginSessionKey = (email: string) =>
+  `twitter-login-session:${email.toLowerCase()}`;
+
+const hasRecordedCurrentBrowserSession = (email: string) =>
+  sessionStorage.getItem(getLoginSessionKey(email)) === "true";
+
+const markCurrentBrowserSessionRecorded = (email: string) => {
+  sessionStorage.setItem(getLoginSessionKey(email), "true");
+};
+
+const clearCurrentBrowserSessionRecorded = (email: string) => {
+  sessionStorage.removeItem(getLoginSessionKey(email));
+};
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -75,33 +106,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const suppressNextAuthStateLoginRecord = useRef(false);
 
-  const refreshUser = async (email?: string) => {
-    const targetEmail = email || auth.currentUser?.email || user?.email;
-    if (!targetEmail) return;
+  const refreshUser = useCallback(
+    async (email?: string, recordLogin = false, forceRecordLogin = false) => {
+      const targetEmail = email || auth.currentUser?.email || user?.email;
+      if (!targetEmail) return;
+      const shouldRecordLogin =
+        recordLogin &&
+        (forceRecordLogin || !hasRecordedCurrentBrowserSession(targetEmail));
 
-    const res = await axiosInstance.get("/api/login", {
-      params: { email: targetEmail },
-    });
+      if (shouldRecordLogin) {
+        markCurrentBrowserSessionRecorded(targetEmail);
+      }
 
-    if (res.data) {
-      setUser(res.data);
-      localStorage.setItem("twitter-user", JSON.stringify(res.data));
-    }
-  };
+      try {
+        const res = await axiosInstance.get("/api/login", {
+          params: { email: targetEmail, recordLogin: shouldRecordLogin },
+        });
+
+        if (res.data) {
+          setUser(res.data);
+          localStorage.setItem("twitter-user", JSON.stringify(res.data));
+        }
+      } catch (error) {
+        if (shouldRecordLogin) {
+          clearCurrentBrowserSessionRecorded(targetEmail);
+        }
+        throw error;
+      }
+    },
+    [user?.email],
+  );
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser?.email) {
         try {
-          const res = await axiosInstance.get("/api/login", {
-            params: { email: firebaseUser.email },
-          });
-
-          if (res.data) {
-            setUser(res.data);
-            localStorage.setItem("twitter-user", JSON.stringify(res.data));
-          }
+          const shouldRecordLogin = !suppressNextAuthStateLoginRecord.current;
+          suppressNextAuthStateLoginRecord.current = false;
+          await refreshUser(firebaseUser.email, shouldRecordLogin);
         } catch (error) {
           console.log(i18n.t("auth.fetchUserFailed"), error);
         }
@@ -112,18 +156,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [refreshUser]);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
+      suppressNextAuthStateLoginRecord.current = true;
       const usercred = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = usercred.user;
       if (firebaseUser.email) {
-        await refreshUser(firebaseUser.email);
+        await refreshUser(firebaseUser.email, true, true);
         toast.success(i18n.t("auth.loginSuccess"));
       }
     } catch (error: any) {
+      suppressNextAuthStateLoginRecord.current = false;
       // console.error("Login Error:", error);
       toast.error(error.message || i18n.t("auth.loginFailed"));
       throw error;
@@ -151,6 +197,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
 
     try {
+      suppressNextAuthStateLoginRecord.current = true;
       const usercred = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -173,6 +220,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (res.data) {
         setUser(res.data);
         localStorage.setItem("twitter-user", JSON.stringify(res.data));
+        if (user.email) {
+          markCurrentBrowserSessionRecorded(user.email);
+        }
         toast.success(i18n.t("auth.signupSuccess"));
       }
       // const mockUser: User = {
@@ -185,6 +235,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       //   joinedDate: "March 2026",
       // };
     } catch (error: any) {
+      suppressNextAuthStateLoginRecord.current = false;
       console.error(error);
       toast.error(error.message || i18n.t("auth.loginFailed"));
     } finally {
@@ -193,8 +244,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const logout = async () => {
+    const loggedOutEmail = user?.email || auth.currentUser?.email;
     setUser(null);
     await signOut(auth);
+    if (loggedOutEmail) {
+      clearCurrentBrowserSessionRecorded(loggedOutEmail);
+    }
     localStorage.removeItem("twitter-user");
     toast.success(i18n.t("auth.logoutSuccess"));
   };
@@ -237,6 +292,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
     try {
       const googleauthProvider = new GoogleAuthProvider();
+      suppressNextAuthStateLoginRecord.current = true;
       const result = await signInWithPopup(auth, googleauthProvider);
       const firebaseUser = result.user;
 
@@ -247,9 +303,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       let userData;
       try {
         const res = await axiosInstance.get("/api/login", {
-          params: { email: firebaseUser.email },
+          params: { email: firebaseUser.email, recordLogin: true },
         });
         userData = res.data;
+        markCurrentBrowserSessionRecorded(firebaseUser.email);
       } catch {
         const newUser = {
           userName: firebaseUser.email.split("@")[0],
@@ -259,6 +316,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         };
         const res = await axiosInstance.post("/api/register", newUser);
         userData = res.data;
+        markCurrentBrowserSessionRecorded(firebaseUser.email);
       }
       if (userData) {
         setUser(userData);
@@ -269,6 +327,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         throw new Error(i18n.t("auth.userDataMissing"));
       }
     } catch (error: any) { 
+      if (auth.currentUser?.email) {
+        clearCurrentBrowserSessionRecorded(auth.currentUser.email);
+      }
+      suppressNextAuthStateLoginRecord.current = false;
       // console.error("Google Sign-In Error:", error);
       toast.error(
         error.response?.data?.message || error.message || i18n.t("auth.loginFailed"),

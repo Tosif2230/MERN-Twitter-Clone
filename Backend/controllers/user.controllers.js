@@ -1,4 +1,63 @@
 import UserModel from "../models/user.model.js";
+import { UAParser } from "ua-parser-js";
+
+const getDeviceCategory = (deviceType) => {
+  if (["mobile", "tablet", "wearable"].includes(deviceType)) return "mobile";
+  if (["console", "smarttv", "embedded"].includes(deviceType)) return "desktop";
+  return "desktop";
+};
+
+const getIpAddress = (req) => {
+  const forwardedFor = req.headers["x-forwarded-for"];
+  const ip = Array.isArray(forwardedFor)
+    ? forwardedFor[0]
+    : forwardedFor?.split(",")[0];
+
+  return (
+    ip?.trim() ||
+    req.headers["x-real-ip"] ||
+    req.socket?.remoteAddress ||
+    req.ip ||
+    "Unknown IP"
+  );
+};
+
+const buildLoginHistoryEntry = (req) => {
+  const userAgent = req.headers["user-agent"] || "";
+  const parser = new UAParser(userAgent);
+  const browser = parser.getBrowser();
+  const os = parser.getOS();
+  const device = parser.getDevice();
+
+  return {
+    browser: browser.name || "Unknown browser",
+    operatingSystem: os.name || "Unknown OS",
+    deviceCategory: getDeviceCategory(device.type),
+    ipAddress: getIpAddress(req),
+    loggedInAt: new Date(),
+  };
+};
+
+const appendLoginHistory = async (user, req) => {
+  const loginEntry = buildLoginHistoryEntry(req);
+  const lastLogin = user.loginHistory?.[0];
+  const isDuplicateRecentLogin =
+    lastLogin &&
+    lastLogin.browser === loginEntry.browser &&
+    lastLogin.operatingSystem === loginEntry.operatingSystem &&
+    lastLogin.deviceCategory === loginEntry.deviceCategory &&
+    lastLogin.ipAddress === loginEntry.ipAddress &&
+    Math.abs(new Date(lastLogin.loggedInAt).getTime() - loginEntry.loggedInAt.getTime()) <
+      10000;
+
+  if (isDuplicateRecentLogin) {
+    return user;
+  }
+
+  user.loginHistory = [loginEntry, ...(user.loginHistory || [])].slice(0, 25);
+  await user.save();
+  return user;
+};
 
 //Regester
 export async function registerUser(req, res) {
@@ -18,6 +77,7 @@ export async function registerUser(req, res) {
       subscriptionDate: req.body.subscriptionDate || joinedDate,
       subscriptionExpiresAt: req.body.subscriptionExpiresAt || expiresAt,
     });
+    newUser.loginHistory = [buildLoginHistoryEntry(req)];
     await newUser.save();
 
     return res.status(201).send(newUser);
@@ -29,7 +89,7 @@ export async function registerUser(req, res) {
 //Login
 export async function loginUser(req, res) {
   try {
-    const { email } = req.query;
+    const { email, recordLogin } = req.query;
 
     if (!email) {
       return res.status(400).send({ error: "Email Required." });
@@ -39,6 +99,11 @@ export async function loginUser(req, res) {
 
     if (!user) {
       return res.status(404).send({ error: "User not found" });
+    }
+
+    if (recordLogin === "true") {
+      const updatedUser = await appendLoginHistory(user, req);
+      return res.status(200).send(updatedUser);
     }
 
     return res.status(200).send(user);
