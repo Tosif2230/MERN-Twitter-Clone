@@ -39,7 +39,7 @@ export default function RightSidebar() {
   const { t } = useTranslation();
 
   return (
-    <div className="sticky top-0 w-full max-w-[20rem] space-y-4">
+    <div className="sticky top-0 w-full max-w-[20rem] space-y-2">
       {/* Search */}
       <div className="sticky top-2 z-50 w-full space-y-4 bg-black">
         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />

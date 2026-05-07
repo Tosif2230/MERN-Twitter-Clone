@@ -151,11 +151,11 @@ const AuthModal = ({
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <Card className="w-full max-w-md bg-black border-gray-800 text-white">
-        <CardHeader className="relative pb-1">
+        <CardHeader className="relative">
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-4 top-4 text-white hover:bg-gray-900"
+            className="absolute right-4 top-0 text-white hover:bg-gray-900"
             onClick={onClose}
           >
             <X className="h-4 w-4" />
@@ -177,7 +177,7 @@ const AuthModal = ({
               {errors.general}
             </div>
           )}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-2">
             {mode === "signup" && (
               <>
                 <div className="space-y-2">
@@ -330,7 +330,7 @@ const AuthModal = ({
           </form>
           <div className="relative">
             <Separator className="bg-gray-700" />
-            <span className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black px-2 text-gray-400 text-sm">
+            <span className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black px-1 text-gray-400 text-sm">
               {t("auth.or")}
             </span>
           </div>

@@ -11,7 +11,7 @@ import LanguageSelector from "./language/LanguageSelector";
 
 function Landing() {
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const { user, logout, googleSignin } = useAuth();
+  const { user, googleSignin } = useAuth();
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const { t } = useTranslation();
 
@@ -31,9 +31,9 @@ function Landing() {
       </div>
       {/* Right side - Content */}
       <div className="flex-1 lg:flex-1 flex flex-col justify-center px-8 lg:px-16 max-w-lg lg:max-w-2xl">
-        <div className="mb-6 flex justify-end">
+        <div className="mb-2 flex justify-end">
           <LanguageSelector
-            className="w-48 border-gray-700 bg-black text-white"
+            className="w-40 border-gray-700 bg-black text-white"
             requireVerification={false}
           />
         </div>
@@ -41,7 +41,7 @@ function Landing() {
           <TwitterLogo size="xl" className="text-white mx-auto" />
         </div>
 
-        <div className="space-y-12">
+        <div className="space-y-10">
           <div>
             <h1 className="text-5xl lg:text-6xl font-bold mb-8 leading-tight">
               {t("landing.title")}

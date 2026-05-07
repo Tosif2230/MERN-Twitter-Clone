@@ -108,7 +108,7 @@ const Mainlayout = ({ children }: any) => {
         flex justify-around 
         border-t border-gray-800 
         bg-black p-2 
-        md:hidden z-50
+        md:hidden
       "
       >
         <button className="p-2" onClick={() => handleNavigate("home")}>

@@ -96,7 +96,7 @@ const Sidebar = ({
         isMobile ? "w-72" : "sticky top-0 w-20 lg:w-64",
       )}
     >
-      <div className="flex items-center justify-between p-4">
+      <div className="flex items-center justify-between p-2">
         <TwitterLogo size="lg" className="text-white" />
         {isMobile && (
           <Button
@@ -138,7 +138,11 @@ const Sidebar = ({
         </ul>
         <div className="mt-4 px-2 py-2">
           <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-full text-lg">
-            {isCompact ? <Menu className="h-5 w-5 lg:hidden" /> : t("sidebar.post")}
+            {isCompact ? (
+              <Menu className="h-5 w-5 lg:hidden" />
+            ) : (
+              t("sidebar.post")
+            )}
             <span className={cn(isCompact && "hidden lg:inline")}>
               {isCompact ? t("sidebar.post") : ""}
             </span>
@@ -157,14 +161,22 @@ const Sidebar = ({
                   <AvatarImage src={user.avatar} alt={user.displayName} />
                   <AvatarFallback>{user.displayName[0]}</AvatarFallback>
                 </Avatar>
-                <div className={cn("flex-1 text-left", isCompact && "hidden lg:block")}>
+                <div
+                  className={cn(
+                    "flex-1 text-left",
+                    isCompact && "hidden lg:block",
+                  )}
+                >
                   <div className="text-white font-semibold">
                     {user.displayName}
                   </div>
                   <div className="text-gray-400 text-sm">@{user.userName}</div>
                 </div>
                 <MoreHorizontal
-                  className={cn("h-5 w-5 text-gray-400", isCompact && "hidden lg:block")}
+                  className={cn(
+                    "h-5 w-5 text-gray-400",
+                    isCompact && "hidden lg:block",
+                  )}
                 />
               </Button>
             </DropdownMenuTrigger>
@@ -173,9 +185,7 @@ const Sidebar = ({
                 <Settings className="mr-2 h-4 w-4" />
                 {t("sidebar.settings")}
               </DropdownMenuItem>
-              <LanguageSelector
-                type="dropdownMenu"
-              />
+              <LanguageSelector type="dropdownMenu" />
               <DropdownMenuSeparator className="bg-gray-800" />
               <DropdownMenuItem
                 className="text-white hover:bg-gray-900"
