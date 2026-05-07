@@ -12,14 +12,14 @@ import subscriptionRoute from "./routes/subscription.route.js";
 import { configureCloudinary } from "./services/cloudinary.service.js";
 
 const app = express();
-const corsOptions = {
-  origin: '*', // Allow from anywhere
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Explicitly allow PATCH
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-};
+// const corsOptions = {
+//   origin: '*', // Allow from anywhere
+//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Explicitly allow PATCH
+//   preflightContinue: false,
+//   optionsSuccessStatus: 204
+// };
 
-app.use(cors(corsOptions));
+app.use(cors());
 
 app.use(express.json());
 
