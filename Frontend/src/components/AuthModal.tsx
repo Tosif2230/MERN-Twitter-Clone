@@ -149,38 +149,38 @@ const AuthModal = ({
     });
   };
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-3 sm:p-4 md:p-6">
       <Card className="w-full max-w-md bg-black border-gray-800 text-white">
-        <CardHeader className="relative">
+        <CardHeader className="relative pb-1">
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-4 top-0 text-white hover:bg-gray-900"
+            className="absolute right-4 top-1 text-white hover:bg-gray-900"
             onClick={onClose}
           >
             <X className="h-4 w-4" />
           </Button>
           <div className="text-center">
-            <div className="mb-4 flex justify-center">
+            <div className="mb-2 flex justify-center">
               <TwitterLogo size="xl" className="text-white" />
             </div>
-            <CardTitle className="text-2xl font-bold">
+            <CardTitle className="text-2xl font-semibold">
               {mode === "login"
                 ? t("auth.signInTitle")
                 : t("auth.createTitle")}
             </CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           {errors.general && (
             <div className="bg-red-900/20 border border-red-800 rounded-lg p-3 text-red-400 text-sm">
               {errors.general}
             </div>
           )}
-          <form onSubmit={handleSubmit} className="space-y-2">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {mode === "signup" && (
               <>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="displayName" className="text-white">
                     {t("auth.displayName")}
                   </Label>
@@ -202,7 +202,7 @@ const AuthModal = ({
                   )}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="username" className="text-white">
                     {t("auth.username")}
                   </Label>
@@ -227,7 +227,7 @@ const AuthModal = ({
                 </div>
               </>
             )}
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label htmlFor="email" className="text-white">
                 {t("auth.email")}
               </Label>
@@ -248,7 +248,7 @@ const AuthModal = ({
             </div>
 
             {mode === "signup" && (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="phone" className="text-white">
                   {t("auth.phone")}
                 </Label>
@@ -271,7 +271,7 @@ const AuthModal = ({
               </div>
             )}
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label htmlFor="password" className="text-white">
                 {t("auth.password")}
               </Label>

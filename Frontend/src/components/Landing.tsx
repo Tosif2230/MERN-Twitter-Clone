@@ -26,7 +26,7 @@ function Landing() {
   return (
     <div className="min-h-screen bg-black text-white flex">
       {/* Left side - Logo */}
-      <div className="hidden lg:flex lg:flex-1 items-center justify-center">
+      <div className="hidden md:flex md:flex-1 items-center justify-center">
         <TwitterLogo className="text-white h-80 w-80" />
       </div>
       {/* Right side - Content */}
